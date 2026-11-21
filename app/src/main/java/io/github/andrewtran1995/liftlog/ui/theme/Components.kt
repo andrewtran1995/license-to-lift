@@ -25,12 +25,12 @@ fun ScreenHeader(code: String, title: String, modifier: Modifier = Modifier) {
     }
 }
 
-/** Flat bordered panel used for every card in the app. */
+/** Translucent instrument panel: the blueprint grid shows faintly through it. */
 @Composable
 fun Panel(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
+        shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(containerColor = Spy.Panel),
         border = BorderStroke(1.dp, Spy.Wire),
     ) {

@@ -19,7 +19,7 @@ jobs:
       - name: Build debug APK
         run: ./gradlew assembleDebug --stacktrace
       - name: Upload APK
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: lift-log-debug
           path: app/build/outputs/apk/debug/*.apk

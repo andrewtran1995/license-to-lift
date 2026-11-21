@@ -15,6 +15,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -77,16 +79,16 @@ private val SetNumWidth = 28.dp
 private val TimesWidth = 14.dp
 private val RemoveWidth = 40.dp
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun LogScreen(dao: WorkoutDao, onSaved: () -> Unit) {
+fun LogScreen(dao: WorkoutDao, contentPadding: PaddingValues, onSaved: () -> Unit) {
     val vm: LogViewModel = viewModel(factory = viewModelFactory { initializer { LogViewModel(dao) } })
     val context = LocalContext.current
     var pickingDate by remember { mutableStateOf(false) }
 
     LazyColumn(
         Modifier.imePadding(),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item { ScreenHeader("// NEW ENTRY", "Mission log") }
@@ -158,7 +160,7 @@ fun LogScreen(dao: WorkoutDao, onSaved: () -> Unit) {
             OutlinedButton(
                 onClick = vm::addExercise,
                 modifier = Modifier.fillMaxWidth().height(48.dp),
-                shape = MaterialTheme.shapes.medium,
+                shapes = ButtonDefaults.shapes(),
                 border = BorderStroke(1.dp, Spy.Wire),
             ) { Text("+ ADD EXERCISE", style = MaterialTheme.typography.labelLarge) }
         }
@@ -178,8 +180,8 @@ fun LogScreen(dao: WorkoutDao, onSaved: () -> Unit) {
                     }
                     if (!ok) Toast.makeText(context, "Add at least one exercise", Toast.LENGTH_SHORT).show()
                 },
-                modifier = Modifier.fillMaxWidth().height(54.dp),
-                shape = MaterialTheme.shapes.medium,
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                shapes = ButtonDefaults.shapes(),
             ) { Text("LOG MISSION", style = MaterialTheme.typography.labelLarge) }
         }
     }

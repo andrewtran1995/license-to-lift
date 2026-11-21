@@ -1,13 +1,13 @@
 # License to Lift
 
-A native Android app for logging gym workouts (exercises, sets, weight and optional reps by date) and tracking progress over time. It's the native successor to the Lift Log web app, styled as a night-time field terminal: graphite panels, signal-cyan readouts, JetBrains Mono throughout.
+A native Android app for logging gym workouts (exercises, sets, weight and optional reps by date) and tracking progress over time. It's the native successor to the Lift Log web app, styled as a Q-Lab bench at night: a blueprint-grid backdrop, a refracting glass nav bar (Haze), translucent instrument panels, Material 3 Expressive motion, and JetBrains Mono throughout.
 
 ## Stack
 
 | Layer | Choice | Why |
 |---|---|---|
 | Language | Kotlin | Google's default for Android |
-| UI | Jetpack Compose + Material 3 | Declarative UI, the current standard for new apps |
+| UI | Jetpack Compose + Material 3 Expressive, Haze glass | Declarative UI with spring motion and a refracting glass nav bar |
 | Storage | Room (SQLite) | Offline by default, with reactive `Flow` queries |
 | Build | AGP 9 (built-in Kotlin), Gradle version catalog, KSP | Current build setup, with no kapt |
 | CI | GitHub Actions | Builds a debug APK on every push to `main` |

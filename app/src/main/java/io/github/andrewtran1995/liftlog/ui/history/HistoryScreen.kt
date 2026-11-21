@@ -33,21 +33,21 @@ import io.github.andrewtran1995.liftlog.ui.theme.Spy
 import kotlinx.coroutines.launch
 
 @Composable
-fun HistoryScreen(dao: WorkoutDao) {
+fun HistoryScreen(dao: WorkoutDao, contentPadding: PaddingValues) {
     val flow = remember(dao) { dao.observeWorkouts() }
     val workouts by flow.collectAsStateWithLifecycle(initialValue = null)
     val scope = rememberCoroutineScope()
     val list = workouts
     when {
         list == null -> Unit
-        list.isEmpty() -> Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
+        list.isEmpty() -> Box(Modifier.fillMaxSize().padding(contentPadding).padding(16.dp), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Caption("// Dossier empty")
                 Text("No missions on file.", style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
                 Text("Log your first session to open the dossier.", color = Spy.Muted, textAlign = TextAlign.Center)
             }
         }
-        else -> LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        else -> LazyColumn(contentPadding = contentPadding, verticalArrangement = Arrangement.spacedBy(10.dp)) {
             item { ScreenHeader("// ${list.size} ON FILE", "Dossier") }
             itemsIndexed(list) { index, w ->
                 Panel {
