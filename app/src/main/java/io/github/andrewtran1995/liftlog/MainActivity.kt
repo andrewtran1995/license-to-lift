@@ -66,16 +66,16 @@ private fun LiftLogRoot(dao: WorkoutDao) {
     // Screens scroll under the status bar and the floating glass bar, so they pad for both.
     val content = PaddingValues(start = 16.dp, end = 16.dp, top = status + 16.dp, bottom = nav + 110.dp)
 
+    val fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
+    val fadeOutSpec = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
+
     Box(Modifier.fillMaxSize()) {
         // Everything inside this box is what the glass bar refracts.
         Box(Modifier.fillMaxSize().hazeSource(hazeState)) {
             BlueprintBackdrop(Modifier.fillMaxSize())
             AnimatedContent(
                 targetState = tab,
-                transitionSpec = {
-                    fadeIn(MaterialTheme.motionScheme.defaultEffectsSpec()) togetherWith
-                        fadeOut(MaterialTheme.motionScheme.fastEffectsSpec())
-                },
+                transitionSpec = { fadeIn(fadeInSpec) togetherWith fadeOut(fadeOutSpec) },
                 label = "tab",
             ) { t ->
                 when (t) {

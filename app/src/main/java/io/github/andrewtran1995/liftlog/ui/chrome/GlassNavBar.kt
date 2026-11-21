@@ -71,8 +71,6 @@ fun GlassNavBar(
             whitePoint(-0.23f)
             chromaMultiplier(1.25f)
             chromaticAberrationStrength(0.35f)
-            rimHighlight(0.35f, 1.dp, 0f)
-            fallbackColor(Color(0xE60D131B))
         }
     }
     BoxWithConstraints(
