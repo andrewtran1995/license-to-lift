@@ -57,7 +57,7 @@ private const val RepMillis = 2400
 
 /**
  * A low-poly figure for [name]. When [animated], it performs two slow reps each time [playKey]
- * changes (and when tapped), then rests at the top of the movement. It doesn't loop: a looping
+ * changes (and when tapped), ending in the pose it started from. It doesn't loop: a looping
  * figure would redraw every frame, and the glass nav bar would re-capture the screen with it.
  * Static figures (icons) are drawn once, at the top of the movement.
  */
@@ -69,11 +69,15 @@ fun ExerciseFigure(name: String, modifier: Modifier = Modifier, animated: Boolea
 
     if (animated) {
         LaunchedEffect(kind, playKey, taps) {
+            // Raw progress 0 and 1 are the same pose (the start), so wrapping from 1 back to 0 is
+            // invisible. If a replay interrupts a rep, finish that rep first instead of jumping.
+            val v = progress.value
+            if (v > 0f && v < 1f) progress.animateTo(1f, tween(((1f - v) * RepMillis).toInt(), easing = LinearEasing))
             repeat(2) {
                 progress.snapTo(0f)
                 progress.animateTo(1f, tween(RepMillis, easing = LinearEasing))
             }
-            progress.snapTo(0.5f) // rest at the top of the movement
+            // Ends at raw 1 = the start pose, exactly where it began.
         }
     }
 
@@ -81,9 +85,7 @@ fun ExerciseFigure(name: String, modifier: Modifier = Modifier, animated: Boolea
         modifier.clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { taps++ }
     } else modifier
     Canvas(m.semantics { contentDescription = "$name figure" }) {
-        // There-and-back: 0 → 1 → 0 over one rep, eased at both ends.
-        val raw = progress.value
-        val p = Ease.transform(if (raw < 0.5f) raw * 2f else (1f - raw) * 2f)
+        val p = repPhase(progress.value)
         val s = minOf(size.width / 160f, size.height / 140f)
         translate((size.width - 160f * s) / 2f, (size.height - 140f * s) / 2f) {
             scale(s, s, pivot = Offset.Zero) {
@@ -101,7 +103,17 @@ fun ExerciseFigure(name: String, modifier: Modifier = Modifier, animated: Boolea
     }
 }
 
-private fun lerp(a: Float, b: Float, t: Float) = a + (b - a) * t
+/**
+ * Maps raw rep progress (0..1) to a pose phase: 0 = start pose, 1 = peak. There-and-back and
+ * eased at both ends, so repPhase(0) == repPhase(1) == 0 with zero speed: reps join seamlessly.
+ * Every pose is a pure function of this phase; that is what makes a figure loop perfectly.
+ */
+internal fun repPhase(raw: Float): Float {
+    val r = raw.coerceIn(0f, 1f)
+    return Ease.transform(if (r < 0.5f) r * 2f else (1f - r) * 2f)
+}
+
+internal fun lerp(a: Float, b: Float, t: Float) = a + (b - a) * t
 
 // ---- drawing primitives, in the 160×140 design space ----
 

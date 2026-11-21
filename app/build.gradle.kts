@@ -73,4 +73,6 @@ dependencies {
 
     implementation(libs.haze)
     implementation(libs.haze.glass)
+
+    testImplementation(libs.junit)
 }

@@ -21,6 +21,9 @@ jobs:
       - uses: gradle/actions/setup-gradle@v5
 
       # Release build: R8-optimised and not debuggable, so it runs much smoother than a debug APK.
+      - name: Unit tests
+        run: ./gradlew testDebugUnitTest --stacktrace
+
       - name: Build release APK
         run: ./gradlew assembleRelease --stacktrace
 
