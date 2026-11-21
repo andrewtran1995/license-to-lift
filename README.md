@@ -10,7 +10,7 @@ A native Android app for logging gym workouts (exercises, sets, weight and optio
 | UI | Jetpack Compose + Material 3 Expressive, Haze glass | Declarative UI with spring motion and a refracting glass nav bar |
 | Storage | Room (SQLite) | Offline by default, with reactive `Flow` queries |
 | Build | AGP 9 (built-in Kotlin), Gradle version catalog, KSP | Current build setup, with no kapt |
-| CI | GitHub Actions | Builds a debug APK on every push to `main` |
+| CI | GitHub Actions | Builds a signed release APK and publishes a GitHub release on every push to `main` |
 
 Min SDK 29 (Android 10), target and compile SDK 37.
 
@@ -19,7 +19,10 @@ Min SDK 29 (Android 10), target and compile SDK 37.
 1. Open the folder in a current Android Studio and let Gradle sync.
 2. Plug in your phone with USB debugging on, then press **Run**.
 
-Or skip Studio: open the latest **Build** run under the repo's **Actions** tab, download the `lift-log-debug` artifact and install the APK on your phone.
+Or skip Studio: every push to `main` publishes a release. On your phone, open
+<https://github.com/andrewtran1995/license-to-lift/releases/latest/download/license-to-lift.apk>
+and install it. Builds are release-optimised and all signed with the same key
+(`signing/`), so each one installs over the last and keeps your data.
 
 ## Data model
 
@@ -37,6 +40,7 @@ Or skip Studio: open the latest **Build** run under the repo's **Actions** tab, 
 - [x] Intel: per-exercise progress (heaviest, volume, reps) with chart
 - [ ] Settings: units (DataStore)
 - [x] Import a backup from the web app (paste or file; idempotent)
+- [x] Export a backup (same format as the web app)
 - [ ] Sync (see below)
 
 ## Sync

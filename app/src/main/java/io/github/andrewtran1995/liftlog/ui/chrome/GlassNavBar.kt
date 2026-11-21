@@ -46,8 +46,9 @@ private val BarShape = RoundedCornerShape(30.dp)
 private val PillShape = RoundedCornerShape(24.dp)
 
 /**
- * Glass instrument bar: the backdrop refracts through it, with a little chromatic dispersion at
- * the edges like a lens. The selection pill slides between tabs on the theme's expressive spring.
+ * Glass instrument bar: the backdrop refracts through it like a lens. Reads the captured
+ * hazeSource (Sources) rather than the window backdrop: Haze's own benchmarks found Sources
+ * cheaper on the CPU for Glass. The selection pill slides between tabs on the theme's expressive spring.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -70,14 +71,13 @@ fun GlassNavBar(
             contrast(-0.31f)
             whitePoint(-0.23f)
             chromaMultiplier(1.25f)
-            chromaticAberrationStrength(0.35f)
         }
     }
     BoxWithConstraints(
         modifier
             .fillMaxWidth()
             .height(68.dp)
-            .hazeGlass(input = HazeInput.Backdrop(hazeState), style = glass)
+            .hazeGlass(input = HazeInput.Sources(hazeState), style = glass)
             .border(1.dp, Color.White.copy(alpha = 0.10f), BarShape),
     ) {
         val inset = 6.dp

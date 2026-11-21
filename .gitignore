@@ -11,3 +11,4 @@
 .cxx/
 *.keystore
 *.jks
+!signing/license-to-lift.jks

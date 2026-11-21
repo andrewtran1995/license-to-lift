@@ -88,7 +88,8 @@ fun IntelScreen(dao: WorkoutDao, contentPadding: PaddingValues) {
     }
     val selected = types.firstOrNull { it.id == selectedId } ?: types.first()
 
-    val points = workouts.asReversed().mapNotNull { w -> // oldest first
+    // Derived once per data change, not on every recomposition (chip taps, scrolling).
+    val points = remember(workouts, selected.id) { workouts.asReversed().mapNotNull { w -> // oldest first
         val ex = w.exercises.firstOrNull { it.exercise.typeId == selected.id || exerciseKey(it.exercise.name) == selected.nameKey }
             ?: return@mapNotNull null
         val f = if (w.workout.unit == "kg" && DisplayUnit == "lb") KgToLb else 1.0
@@ -100,7 +101,7 @@ fun IntelScreen(dao: WorkoutDao, contentPadding: PaddingValues) {
             volume = ex.sets.sumOf { (it.weight ?: 0.0) * f * (it.reps ?: 0) },
             reps = ex.sets.sumOf { it.reps ?: 0 },
         )
-    }
+    } }
 
     LazyColumn(contentPadding = contentPadding, verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item { ScreenHeader("// ${types.size} IN CATALOG", "Intel") }

@@ -69,7 +69,7 @@ private fun LiftLogRoot(dao: WorkoutDao, store: SessionStore) {
     // Screens scroll under the status bar and the floating glass bar, so they pad for both.
     val content = PaddingValues(start = 16.dp, end = 16.dp, top = status + 16.dp, bottom = nav + 110.dp)
 
-    val fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
+    val fadeInSpec = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
     val fadeOutSpec = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
 
     Box(Modifier.fillMaxSize()) {

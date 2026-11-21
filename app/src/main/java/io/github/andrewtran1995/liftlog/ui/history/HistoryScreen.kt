@@ -15,6 +15,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import io.github.andrewtran1995.liftlog.data.BackupExport
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.time.LocalDate
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import io.github.andrewtran1995.liftlog.data.SessionStore
@@ -45,6 +51,17 @@ fun HistoryScreen(dao: WorkoutDao, store: SessionStore, contentPadding: PaddingV
     val context = LocalContext.current
     val activeId by store.activeId.collectAsStateWithLifecycle()
     var importing by remember { mutableStateOf(false) }
+    val export = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
+        val all = workouts
+        if (uri != null && all != null) scope.launch {
+            val ok = withContext(Dispatchers.IO) {
+                runCatching {
+                    context.contentResolver.openOutputStream(uri)?.bufferedWriter()?.use { it.write(BackupExport.toJson(all)) }
+                }.isSuccess
+            }
+            Toast.makeText(context, if (ok) "Exported ${all.size} missions" else "Export failed", Toast.LENGTH_SHORT).show()
+        }
+    }
     if (importing) ImportSheet(dao, onDismiss = { importing = false })
     val list = workouts
     when {
@@ -62,9 +79,12 @@ fun HistoryScreen(dao: WorkoutDao, store: SessionStore, contentPadding: PaddingV
                 Row(verticalAlignment = Alignment.Bottom) {
                     ScreenHeader("// ${list.size} ON FILE", "Dossier", Modifier.weight(1f))
                     TextButton(onClick = { importing = true }) { Text("IMPORT", style = MaterialTheme.typography.labelLarge) }
+                    TextButton(onClick = { export.launch("license-to-lift-backup-${LocalDate.now()}.json") }) {
+                        Text("EXPORT", style = MaterialTheme.typography.labelLarge)
+                    }
                 }
             }
-            itemsIndexed(list) { index, w ->
+            itemsIndexed(list, key = { _, w -> w.workout.id }) { index, w ->
                 Panel {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f)) {

@@ -16,8 +16,22 @@ android {
         versionName = "0.1.0"
     }
 
+    // One permanent key (see signing/README.md) so each new build installs over the last one.
+    signingConfigs {
+        create("shared") {
+            storeFile = rootProject.file("signing/license-to-lift.jks")
+            storePassword = "licensetolift"
+            keyAlias = "license-to-lift"
+            keyPassword = "licensetolift"
+        }
+    }
+
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("shared")
+        }
         release {
+            signingConfig = signingConfigs.getByName("shared")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
@@ -30,12 +44,19 @@ android {
     buildFeatures { compose = true }
 }
 
+base {
+    archivesName = "license-to-lift" // APKs come out as license-to-lift-release.apk
+}
+
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 dependencies {
     implementation(libs.androidx.core.ktx)
+    // Installs the startup/scroll profiles that Compose and other libraries ship, so a sideloaded
+    // APK gets ahead-of-time compiled hot paths instead of running them interpreted at first.
+    implementation(libs.androidx.profileinstaller)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
