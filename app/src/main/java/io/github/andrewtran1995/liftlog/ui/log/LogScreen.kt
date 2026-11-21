@@ -3,6 +3,19 @@ package io.github.andrewtran1995.liftlog.ui.log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -129,8 +142,10 @@ fun LogScreen(dao: WorkoutDao, store: SessionStore, contentPadding: PaddingValue
     LaunchedEffect(activeId) { vm.selected = 0 }
 
     val exercises = session?.exercises?.sortedBy { it.exercise.position }.orEmpty()
-    val selected = vm.selected.coerceIn(0, exercises.size)
-    val adding = selected >= exercises.size
+    val selected = vm.selected.coerceIn(0, (exercises.size - 1).coerceAtLeast(0))
+    // A fresh mission opens on the full add screen; after that, adding is the pinned + and its sheet.
+    val adding = exercises.isEmpty()
+    var addSheet by remember { mutableStateOf(false) }
 
     // Lift the layout above the keyboard only when a field on this screen is focused (e.g. weight).
     // The keyboard also opens for the details sheet and other popups; those float on their own
@@ -172,23 +187,22 @@ fun LogScreen(dao: WorkoutDao, store: SessionStore, contentPadding: PaddingValue
         if (exercises.isNotEmpty()) {
             val rowState = rememberLazyListState()
             LaunchedEffect(selected) { rowState.animateScrollToItem(selected) }
-            LazyRow(state = rowState, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                itemsIndexed(exercises, key = { _, e -> e.exercise.id }) { i, e ->
-                    FilterChip(
-                        selected = i == selected,
-                        onClick = { vm.selected = i },
-                        label = { Text("${e.exercise.name} · ${e.sets.size}", maxLines = 1) },
-                        leadingIcon = { ExerciseFigure(e.exercise.name, Modifier.size(width = 28.dp, height = 24.dp)) },
-                        colors = chipColors(),
-                    )
-                }
-                item {
-                    FilterChip(
-                        selected = adding,
-                        onClick = { vm.selected = exercises.size },
-                        label = { Text("+ ADD", style = MaterialTheme.typography.labelLarge) },
-                        colors = chipColors(),
-                    )
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                PinnedAdd(onClick = { addSheet = true })
+                LazyRow(
+                    state = rowState,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.weight(1f).fadeEdges(rowState),
+                ) {
+                    itemsIndexed(exercises, key = { _, e -> e.exercise.id }) { i, e ->
+                        FilterChip(
+                            selected = i == selected,
+                            onClick = { vm.selected = i },
+                            label = { Text("${e.exercise.name} · ${e.sets.size}", maxLines = 1) },
+                            leadingIcon = { ExerciseFigure(e.exercise.name, Modifier.size(width = 28.dp, height = 24.dp)) },
+                            colors = chipColors(),
+                        )
+                    }
                 }
             }
         }
@@ -198,11 +212,9 @@ fun LogScreen(dao: WorkoutDao, store: SessionStore, contentPadding: PaddingValue
                 AddExercisePanel(
                     catalog = catalog.filter { t -> exercises.none { it.exercise.typeId == t.id } },
                     repeatable = if (exercises.isEmpty()) recentMissions(history, activeId) else emptyList(),
-                    backTo = exercises.lastOrNull()?.exercise?.name,
                     onPick = { vm.addExercise(it) },
                     onAdd = { vm.addByName(it) },
                     onRepeat = { vm.repeat(it) },
-                    onBack = { vm.selected = exercises.size - 1 },
                 )
             } else {
                 val ex = exercises[selected]
@@ -218,6 +230,16 @@ fun LogScreen(dao: WorkoutDao, store: SessionStore, contentPadding: PaddingValue
         }
     }
 
+    if (addSheet && exercises.isNotEmpty()) {
+        AddExerciseSheet(
+            catalog = catalog.filter { t -> exercises.none { it.exercise.typeId == t.id } },
+            // addExercise selects the new exercise, so closing the sheet lands on it, ready to log.
+            onPick = { vm.addExercise(it); addSheet = false },
+            onAdd = { vm.addByName(it); addSheet = false },
+            onDismiss = { addSheet = false },
+        )
+    }
+
     val w = session?.workout
     if (editingDetails && w != null) {
         DetailsSheet(
@@ -226,6 +248,57 @@ fun LogScreen(dao: WorkoutDao, store: SessionStore, contentPadding: PaddingValue
             onDiscard = { vm.discard(); editingDetails = false },
             onDismiss = { editingDetails = false },
         )
+    }
+}
+
+/** Always-visible add button pinned left of the exercise tabs. */
+@Composable
+private fun PinnedAdd(onClick: () -> Unit) {
+    Box(
+        Modifier
+            .size(40.dp)
+            .clip(MaterialTheme.shapes.small)
+            .background(Spy.Signal.copy(alpha = 0.14f))
+            .border(1.dp, Spy.Signal.copy(alpha = 0.45f), MaterialTheme.shapes.small)
+            .clickable(role = Role.Button, onClickLabel = "Add exercise", onClick = onClick)
+            .semantics { contentDescription = "Add exercise" },
+        contentAlignment = Alignment.Center,
+    ) { Text("+", style = BigNumber.copy(fontSize = 22.sp, color = Spy.Signal)) }
+}
+
+/** Fades whichever edge of a horizontal list has more items scrolled out of view. */
+private fun Modifier.fadeEdges(state: androidx.compose.foundation.lazy.LazyListState, width: Dp = 24.dp): Modifier =
+    graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+        .drawWithContent {
+            drawContent()
+            val f = (width.toPx() / size.width).coerceIn(0f, 0.5f)
+            val start = if (state.canScrollBackward) Color.Transparent else Color.Black
+            val end = if (state.canScrollForward) Color.Transparent else Color.Black
+            drawRect(
+                Brush.horizontalGradient(0f to start, f to Color.Black, 1f - f to Color.Black, 1f to end),
+                blendMode = BlendMode.DstIn,
+            )
+        }
+
+/** Mid-mission add: recent exercises and search in a sheet over the exercise you're on. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AddExerciseSheet(
+    catalog: List<ExerciseTypeEntity>,
+    onPick: (ExerciseTypeEntity) -> Unit,
+    onAdd: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = Spy.Panel) {
+        Box(Modifier.padding(horizontal = 20.dp).padding(bottom = 16.dp).navigationBarsPadding()) {
+            AddExercisePanel(
+                catalog = catalog,
+                repeatable = emptyList(),
+                onPick = onPick,
+                onAdd = onAdd,
+                onRepeat = {},
+            )
+        }
     }
 }
 
@@ -242,11 +315,9 @@ private fun recentMissions(history: List<WorkoutWithExercises>, activeId: String
 private fun AddExercisePanel(
     catalog: List<ExerciseTypeEntity>,
     repeatable: List<WorkoutWithExercises>,
-    backTo: String?,
     onPick: (ExerciseTypeEntity) -> Unit,
     onAdd: (String) -> Unit,
     onRepeat: (WorkoutWithExercises) -> Unit,
-    onBack: () -> Unit,
 ) {
     var query by remember { mutableStateOf("") }
     LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -293,9 +364,6 @@ private fun AddExercisePanel(
                     }
                 }
             }
-        }
-        if (backTo != null) {
-            item { TextButton(onClick = onBack) { Text("← BACK TO ${backTo.uppercase()}", style = MaterialTheme.typography.labelLarge) } }
         }
     }
 }
