@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Barbell: bar plus two plates each side, inside the 66dp adaptive-icon safe zone -->
+<!-- Barbell inside a targeting ring, signal cyan on graphite. Kept inside the 66dp safe zone. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp"
     android:viewportWidth="108" android:viewportHeight="108">
-    <path android:fillColor="#FFFFFF" android:pathData="M28,51.5h52v5h-52z" />
-    <path android:fillColor="#FFFFFF" android:pathData="M33,36h8v36h-8z M43,42h6v24h-6z" />
-    <path android:fillColor="#FFFFFF" android:pathData="M67,36h8v36h-8z M59,42h6v24h-6z" />
+    <path android:strokeColor="#3FE0C5" android:strokeWidth="2.5" android:fillColor="#00000000"
+        android:pathData="M54,25a29,29 0,1 1,0 58a29,29 0,1 1,0 -58z" />
+    <path android:fillColor="#3FE0C5" android:pathData="M52.75,19h2.5v10h-2.5z M52.75,79h2.5v10h-2.5z M19,52.75h10v2.5h-10z M79,52.75h10v2.5h-10z" />
+    <path android:fillColor="#E4E8EC" android:pathData="M33,52h42v4h-42z" />
+    <path android:fillColor="#E4E8EC" android:pathData="M37,41h6v26h-6z M44.5,45h4v18h-4z" />
+    <path android:fillColor="#E4E8EC" android:pathData="M65,41h6v26h-6z M59.5,45h4v18h-4z" />
 </vector>

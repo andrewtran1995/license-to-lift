@@ -1,6 +1,6 @@
-# Lift Log
+# License to Lift
 
-A native Android app for logging gym workouts (exercises, sets, weight and optional reps by date) and tracking progress over time. It's the native successor to the Lift Log web app.
+A native Android app for logging gym workouts (exercises, sets, weight and optional reps by date) and tracking progress over time. It's the native successor to the Lift Log web app, styled as a night-time field terminal: graphite panels, signal-cyan readouts, JetBrains Mono throughout.
 
 ## Stack
 
@@ -46,3 +46,7 @@ The web version syncs through Claude's artifact storage, which only works inside
 1. **Local only + Android backup.** `allowBackup` is on, so the Room database is included in Google's device backup.
 2. **JSON export/import** to a file in Drive or Downloads.
 3. **A real backend** (e.g. Supabase or Firebase) using the `dirty` and `deleted` columns. Push dirty rows, pull newer rows, newest `updatedAt` wins. That's the same scheme the web app uses.
+
+## Credits
+
+JetBrains Mono is bundled under the SIL Open Font License 1.1 (`licenses/OFL-JetBrainsMono.txt`).

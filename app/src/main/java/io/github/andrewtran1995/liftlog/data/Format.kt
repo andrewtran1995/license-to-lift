@@ -32,3 +32,9 @@ fun summarizeSets(sets: List<SetEntity>, unit: String): String {
         }
     }
 }
+
+/** Readout-style date: "2026-11-16 · MON". */
+fun formatStamp(iso: String): String {
+    val d = LocalDate.parse(iso)
+    return "$iso · ${d.dayOfWeek.name.take(3)}"
+}
