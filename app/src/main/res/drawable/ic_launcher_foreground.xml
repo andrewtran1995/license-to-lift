@@ -1,12 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Barbell inside a targeting ring, signal cyan on graphite. Kept inside the 66dp safe zone. -->
+<!--
+  Targeting HUD: a dumbbell locked inside a scanner frame, with a scan line and a REC dot.
+  Drawn in a 108 design space; the group scales it to 0.78 about the centre, which keeps the
+  bracket corners inside the 66dp safe zone of every launcher mask.
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp"
     android:viewportWidth="108" android:viewportHeight="108">
-    <path android:strokeColor="#3FE0C5" android:strokeWidth="2.5" android:fillColor="#00000000"
-        android:pathData="M54,25a29,29 0,1 1,0 58a29,29 0,1 1,0 -58z" />
-    <path android:fillColor="#3FE0C5" android:pathData="M52.75,19h2.5v10h-2.5z M52.75,79h2.5v10h-2.5z M19,52.75h10v2.5h-10z M79,52.75h10v2.5h-10z" />
-    <path android:fillColor="#E4E8EC" android:pathData="M33,52h42v4h-42z" />
-    <path android:fillColor="#E4E8EC" android:pathData="M37,41h6v26h-6z M44.5,45h4v18h-4z" />
-    <path android:fillColor="#E4E8EC" android:pathData="M65,41h6v26h-6z M59.5,45h4v18h-4z" />
+    <group android:pivotX="54" android:pivotY="54" android:scaleX="0.78" android:scaleY="0.78">
+        <!-- scanner brackets -->
+        <path android:strokeColor="#07090C" android:strokeWidth="3.5" android:strokeLineCap="round"
+            android:strokeLineJoin="round" android:fillColor="#00000000"
+            android:pathData="M28,38V28h10M70,28h10v10M80,70v10H70M38,80H28V70" />
+        <!-- bar and outer plates -->
+        <path android:fillColor="#07090C" android:pathData="M38,52h32v4H38z" />
+        <path android:fillColor="#07090C" android:pathData="M40,43h6v22h-6zM62,43h6v22h-6z" />
+        <!-- inner plates (facet tone) -->
+        <path android:fillColor="#1D3A3B" android:pathData="M47,47h3v14h-3zM58,47h3v14h-3z" />
+        <!-- scan line and REC dot -->
+        <path android:fillColor="#07090C" android:pathData="M31,70h46v1.6h-46z" />
+        <path android:fillColor="#07090C" android:pathData="M32,34a2,2 0,1 0,4 0a2,2 0,1 0,-4 0z" />
+    </group>
 </vector>
