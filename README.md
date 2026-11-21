@@ -30,9 +30,9 @@ Or skip Studio: open the latest **Build** run under the repo's **Actions** tab, 
 ## Status
 
 - [x] Room schema and DAO
-- [x] Log a workout (date picker, exercises, sets, notes)
+- [x] Live logging: one exercise at a time, prefilled sets, reps stepper and quick picks, autosave
 - [x] History list with delete
-- [ ] Edit a past workout
+- [x] Edit a past workout (resume it from the Dossier)
 - [x] Exercise catalog (discrete, addable) with "last time" and one-tap reuse
 - [x] Intel: per-exercise progress (heaviest, volume, reps) with chart
 - [ ] Settings: units (DataStore)

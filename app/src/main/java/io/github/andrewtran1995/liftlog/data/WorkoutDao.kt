@@ -55,9 +55,28 @@ abstract class WorkoutDao {
         return typeByKey(key) ?: type
     }
 
+    @Transaction
+    @Query("SELECT * FROM workouts WHERE id = :id")
+    abstract fun observeWorkout(id: String): Flow<WorkoutWithExercises?>
+
+    @Query("DELETE FROM sets WHERE id = :id")
+    abstract suspend fun deleteSet(id: String)
+
+    @Query("DELETE FROM sets WHERE exerciseId = :exerciseId")
+    abstract suspend fun deleteSetsFor(exerciseId: String)
+
+    @Query("DELETE FROM exercises WHERE id = :id")
+    abstract suspend fun deleteExercise(id: String)
+
+    @Query("UPDATE workouts SET updatedAt = :now, dirty = 1 WHERE id = :id")
+    abstract suspend fun touchWorkout(id: String, now: Long)
+
     @Upsert abstract suspend fun upsertWorkout(workout: WorkoutEntity)
     @Upsert abstract suspend fun upsertExercises(exercises: List<ExerciseEntity>)
     @Upsert abstract suspend fun upsertSets(sets: List<SetEntity>)
+
+    @Query("DELETE FROM sets WHERE exerciseId IN (SELECT id FROM exercises WHERE workoutId = :workoutId)")
+    abstract suspend fun clearSetsForWorkout(workoutId: String)
 
     @Query("DELETE FROM exercises WHERE workoutId = :workoutId")
     abstract suspend fun clearExercises(workoutId: String)
@@ -69,6 +88,7 @@ abstract class WorkoutDao {
     @Transaction
     open suspend fun saveWorkout(workout: WorkoutEntity, exercises: List<Pair<ExerciseEntity, List<SetEntity>>>) {
         upsertWorkout(workout)
+        clearSetsForWorkout(workout.id)
         clearExercises(workout.id)
         upsertExercises(exercises.map { it.first })
         upsertSets(exercises.flatMap { it.second })

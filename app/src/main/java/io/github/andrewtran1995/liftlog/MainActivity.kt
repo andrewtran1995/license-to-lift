@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
+import io.github.andrewtran1995.liftlog.data.SessionStore
 import io.github.andrewtran1995.liftlog.data.WorkoutDao
 import io.github.andrewtran1995.liftlog.ui.chrome.BlueprintBackdrop
 import io.github.andrewtran1995.liftlog.ui.chrome.GlassNavBar
@@ -46,8 +47,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val dao = (application as LiftLogApp).database.workoutDao()
-        setContent { LiftLogTheme { LiftLogRoot(dao) } }
+        val app = application as LiftLogApp
+        val dao = app.database.workoutDao()
+        setContent { LiftLogTheme { LiftLogRoot(dao, app.session) } }
     }
 }
 
@@ -59,7 +61,7 @@ private val Tabs = listOf(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun LiftLogRoot(dao: WorkoutDao) {
+private fun LiftLogRoot(dao: WorkoutDao, store: SessionStore) {
     var tab by rememberSaveable { mutableIntStateOf(0) }
     val hazeState = rememberHazeState()
     val status = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
@@ -80,8 +82,8 @@ private fun LiftLogRoot(dao: WorkoutDao) {
                 label = "tab",
             ) { t ->
                 when (t) {
-                    0 -> LogScreen(dao, content, onSaved = { tab = 1 })
-                    1 -> HistoryScreen(dao, content)
+                    0 -> LogScreen(dao, store, content, onFinished = { tab = 1 })
+                    1 -> HistoryScreen(dao, store, content, onEdit = { tab = 0 })
                     else -> IntelScreen(dao, content)
                 }
             }

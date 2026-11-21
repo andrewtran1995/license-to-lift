@@ -14,7 +14,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import android.widget.Toast
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
+import io.github.andrewtran1995.liftlog.data.SessionStore
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
@@ -35,10 +38,12 @@ import io.github.andrewtran1995.liftlog.ui.theme.Spy
 import kotlinx.coroutines.launch
 
 @Composable
-fun HistoryScreen(dao: WorkoutDao, contentPadding: PaddingValues) {
+fun HistoryScreen(dao: WorkoutDao, store: SessionStore, contentPadding: PaddingValues, onEdit: () -> Unit) {
     val flow = remember(dao) { dao.observeWorkouts() }
     val workouts by flow.collectAsStateWithLifecycle(initialValue = null)
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val activeId by store.activeId.collectAsStateWithLifecycle()
     var importing by remember { mutableStateOf(false) }
     if (importing) ImportSheet(dao, onDismiss = { importing = false })
     val list = workouts
@@ -64,7 +69,7 @@ fun HistoryScreen(dao: WorkoutDao, contentPadding: PaddingValues) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f)) {
                             Text(
-                                "FILE %03d  ·  %s".format(list.size - index, formatStamp(w.workout.date)),
+                                (if (w.workout.id == activeId) "IN PROGRESS  ·  " else "FILE %03d  ·  ".format(list.size - index)) + formatStamp(w.workout.date),
                                 style = MaterialTheme.typography.labelMedium, color = Spy.Signal,
                             )
                             Text(
@@ -72,7 +77,17 @@ fun HistoryScreen(dao: WorkoutDao, contentPadding: PaddingValues) {
                                 style = MaterialTheme.typography.titleLarge,
                             )
                         }
-                        TextButton(onClick = { scope.launch { dao.markDeleted(w.workout.id, System.currentTimeMillis()) } }) {
+                        val live = w.workout.id == activeId
+                        TextButton(onClick = {
+                            if (activeId != null && !live) {
+                                Toast.makeText(context, "Finish the mission in progress first", Toast.LENGTH_SHORT).show()
+                            } else {
+                                store.set(w.workout.id); onEdit()
+                            }
+                        }) {
+                            Text(if (live) "RESUME" else "EDIT", style = MaterialTheme.typography.labelMedium, color = Spy.Signal)
+                        }
+                        if (!live) TextButton(onClick = { scope.launch { dao.markDeleted(w.workout.id, System.currentTimeMillis()) } }) {
                             Text("BURN", style = MaterialTheme.typography.labelMedium, color = Spy.Classified)
                         }
                     }
