@@ -13,7 +13,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.runtime.key
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -87,6 +93,7 @@ fun LogScreen(dao: WorkoutDao, contentPadding: PaddingValues, onSaved: () -> Uni
     val vm: LogViewModel = viewModel(factory = viewModelFactory { initializer { LogViewModel(dao) } })
     val context = LocalContext.current
     var pickingDate by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
     val catalog by vm.catalog.collectAsStateWithLifecycle()
     val history by vm.workouts.collectAsStateWithLifecycle()
 
@@ -146,10 +153,11 @@ fun LogScreen(dao: WorkoutDao, contentPadding: PaddingValues, onSaved: () -> Uni
                     Caption("#", Modifier.width(SetNumWidth))
                     Caption("Weight · ${vm.unit}", Modifier.weight(1f))
                     Spacer(TimesWidth)
-                    Caption("Reps · opt", Modifier.weight(1f))
+                    Caption("Reps?", Modifier.weight(1f))
                     Spacer(RemoveWidth)
                 }
-                ex.sets.forEachIndexed { i, set ->
+                ex.sets.forEachIndexed { i, set -> key(set) {
+                    val repsFocus = remember { FocusRequester() }
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(
                             "%02d".format(i + 1), Modifier.width(SetNumWidth),
@@ -159,20 +167,22 @@ fun LogScreen(dao: WorkoutDao, contentPadding: PaddingValues, onSaved: () -> Uni
                             set.weight, { set.weight = it }, Modifier.weight(1f),
                             placeholder = { Text("—", Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
                             textStyle = NumberStyle, singleLine = true, colors = fieldColors(),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Next),
+                            keyboardActions = KeyboardActions(onNext = { repsFocus.requestFocus() }),
                         )
                         Text("×", Modifier.width(TimesWidth), color = Spy.Muted, textAlign = TextAlign.Center)
                         OutlinedTextField(
-                            set.reps, { set.reps = it }, Modifier.weight(1f),
+                            set.reps, { set.reps = it }, Modifier.weight(1f).focusRequester(repsFocus),
                             placeholder = { Text("—", Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
                             textStyle = NumberStyle, singleLine = true, colors = fieldColors(),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+                            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                         )
                         IconButton(onClick = { vm.removeSet(ex, set) }, Modifier.width(RemoveWidth)) {
                             Icon(painterResource(R.drawable.ic_close), contentDescription = "Remove set ${i + 1}", tint = Spy.Muted, modifier = Modifier.size(18.dp))
                         }
                     }
-                }
+                } }
                 TextButton(onClick = { vm.addSet(ex) }) { Text("+ ADD SET", style = MaterialTheme.typography.labelLarge) }
             }
         }
