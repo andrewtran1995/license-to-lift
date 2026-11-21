@@ -43,6 +43,8 @@ import io.github.andrewtran1995.liftlog.data.WorkoutDao
 import io.github.andrewtran1995.liftlog.data.exerciseKey
 import io.github.andrewtran1995.liftlog.data.formatStamp
 import io.github.andrewtran1995.liftlog.data.summarizeSets
+import androidx.compose.foundation.layout.size
+import io.github.andrewtran1995.liftlog.ui.figures.ExerciseFigure
 import io.github.andrewtran1995.liftlog.ui.theme.Caption
 import io.github.andrewtran1995.liftlog.ui.theme.Mono
 import io.github.andrewtran1995.liftlog.ui.theme.Panel
@@ -112,6 +114,7 @@ fun IntelScreen(dao: WorkoutDao, contentPadding: PaddingValues) {
                         selected = t.id == selected.id,
                         onClick = { selectedId = t.id },
                         label = { Text(t.name, maxLines = 1) },
+                        leadingIcon = { ExerciseFigure(t.name, Modifier.size(width = 28.dp, height = 24.dp)) },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = Spy.Signal.copy(alpha = 0.18f),
                             selectedLabelColor = Spy.Signal,
@@ -119,6 +122,11 @@ fun IntelScreen(dao: WorkoutDao, contentPadding: PaddingValues) {
                         ),
                     )
                 }
+            }
+        }
+        item(key = "figure") {
+            Panel {
+                ExerciseFigure(selected.name, Modifier.fillMaxWidth().height(150.dp), animated = true, playKey = selected.id)
             }
         }
         if (points.isEmpty()) {

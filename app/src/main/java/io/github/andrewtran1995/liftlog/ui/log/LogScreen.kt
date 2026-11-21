@@ -78,6 +78,7 @@ import io.github.andrewtran1995.liftlog.data.WorkoutWithExercises
 import io.github.andrewtran1995.liftlog.data.formatStamp
 import io.github.andrewtran1995.liftlog.data.formatWeight
 import io.github.andrewtran1995.liftlog.data.summarizeSets
+import io.github.andrewtran1995.liftlog.ui.figures.ExerciseFigure
 import io.github.andrewtran1995.liftlog.ui.theme.Caption
 import io.github.andrewtran1995.liftlog.ui.theme.Mono
 import io.github.andrewtran1995.liftlog.ui.theme.Panel
@@ -177,6 +178,7 @@ fun LogScreen(dao: WorkoutDao, store: SessionStore, contentPadding: PaddingValue
                         selected = i == selected,
                         onClick = { vm.selected = i },
                         label = { Text("${e.exercise.name} · ${e.sets.size}", maxLines = 1) },
+                        leadingIcon = { ExerciseFigure(e.exercise.name, Modifier.size(width = 28.dp, height = 24.dp)) },
                         colors = chipColors(),
                     )
                 }
@@ -281,7 +283,13 @@ private fun AddExercisePanel(
             item {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     catalog.take(12).forEach { t ->
-                        FilterChip(selected = false, onClick = { onPick(t) }, label = { Text(t.name, maxLines = 1) }, colors = chipColors())
+                        FilterChip(
+                            selected = false,
+                            onClick = { onPick(t) },
+                            label = { Text(t.name, maxLines = 1) },
+                            leadingIcon = { ExerciseFigure(t.name, Modifier.size(width = 28.dp, height = 24.dp)) },
+                            colors = chipColors(),
+                        )
                     }
                 }
             }
@@ -301,7 +309,9 @@ private fun ExercisePanel(vm: SessionViewModel, ex: ExerciseWithSets, last: Last
     var confirmRemove by remember(ex.exercise.id) { mutableStateOf(false) }
 
     Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            // Two slow reps when the exercise opens and after each logged set; tap to replay.
+            ExerciseFigure(ex.exercise.name, Modifier.size(width = 72.dp, height = 63.dp), animated = true, playKey = sets.size)
             Column(Modifier.weight(1f)) {
                 Text(ex.exercise.name, style = MaterialTheme.typography.headlineSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 if (last != null) {
