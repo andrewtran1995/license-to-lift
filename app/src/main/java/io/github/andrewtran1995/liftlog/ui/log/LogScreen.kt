@@ -191,7 +191,10 @@ fun LogScreen(dao: WorkoutDao, store: SessionStore, contentPadding: PaddingValue
 
         if (exercises.isNotEmpty()) {
             val rowState = rememberLazyListState()
-            LaunchedEffect(selected) { rowState.animateScrollToItem(selected) }
+            // The row shows newest first, right beside the pinned +, while `exercises` and
+            // `selected` stay in workout order (so NEXT, the Dossier and exports keep it).
+            val displayIndex = exercises.size - 1 - selected
+            LaunchedEffect(selected, exercises.size) { rowState.animateScrollToItem(displayIndex) }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 PinnedAdd(onClick = { addSheet = true })
                 LazyRow(
@@ -199,7 +202,8 @@ fun LogScreen(dao: WorkoutDao, store: SessionStore, contentPadding: PaddingValue
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.weight(1f).fadeEdges(rowState),
                 ) {
-                    itemsIndexed(exercises, key = { _, e -> e.exercise.id }) { i, e ->
+                    itemsIndexed(exercises.asReversed(), key = { _, e -> e.exercise.id }) { d, e ->
+                        val i = exercises.size - 1 - d
                         FilterChip(
                             selected = i == selected,
                             onClick = { vm.selected = i },
