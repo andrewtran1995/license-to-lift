@@ -52,6 +52,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -130,11 +131,14 @@ fun LogScreen(dao: WorkoutDao, store: SessionStore, contentPadding: PaddingValue
     val selected = vm.selected.coerceIn(0, exercises.size)
     val adding = selected >= exercises.size
 
-    // With the keyboard up the glass bar is hidden behind it, so pad for whichever is taller.
+    // Lift the layout above the keyboard only when a field on this screen is focused (e.g. weight).
+    // The keyboard also opens for the details sheet and other popups; those float on their own
+    // window, so the exercise card underneath must stay put.
+    var fieldFocused by remember { mutableStateOf(false) }
     val ime = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
-    val bottom = max(contentPadding.calculateBottomPadding(), ime + 12.dp)
+    val bottom = if (fieldFocused) max(contentPadding.calculateBottomPadding(), ime + 12.dp) else contentPadding.calculateBottomPadding()
     Column(
-        Modifier.fillMaxSize().padding(
+        Modifier.fillMaxSize().onFocusChanged { fieldFocused = it.hasFocus }.padding(
             start = 16.dp, end = 16.dp,
             top = contentPadding.calculateTopPadding(), bottom = bottom,
         ),
