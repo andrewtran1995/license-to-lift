@@ -78,6 +78,8 @@ data class SetEntity(
     val position: Int,
     val weight: Double?,
     val reps: Int?,
+    /** Epoch millis when the set was logged. Null for sets logged before v3, which never recorded it. */
+    val loggedAt: Long? = null,
 )
 
 data class ExerciseWithSets(

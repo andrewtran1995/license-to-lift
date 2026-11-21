@@ -8,14 +8,15 @@ lossless copy of the app's Room database: every row of every table, ids included
 {
   "app": "license-to-lift",
   "format": "database",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "exportedAt": 1795290000000,
   "tables": {
     "exercise_types": [{ "id": "…", "name": "Leg curls", "nameKey": "leg curls", "createdAt": 1795… }],
     "workouts":       [{ "id": "…", "date": "2026-11-16", "name": "Leg day", "notes": "", "unit": "lb",
                          "updatedAt": 1795…, "deleted": false, "dirty": true }],
     "exercises":      [{ "id": "…", "workoutId": "…", "position": 0, "name": "Leg curls", "typeId": "…" }],
-    "sets":           [{ "id": "…", "exerciseId": "…", "position": 0, "weight": 90, "reps": 10 }]
+    "sets":           [{ "id": "…", "exerciseId": "…", "position": 0, "weight": 90, "reps": 10,
+                         "loggedAt": 1795… }]
   }
 }
 ```
@@ -34,6 +35,7 @@ lossless copy of the app's Room database: every row of every table, ids included
 | | `typeId` | Catalog entry; `null` or unknown ids are resolved by `name` on import. |
 | `sets` | `exerciseId` | Must be an exercise in the same file. |
 | | `weight`, `reps` | Either may be `null`. Weight `null` is bodyweight; reps are optional. |
+| | `loggedAt` | Epoch milliseconds when the set was logged, or `null`. Sets from before schema 3 have none; older files import with `null`. |
 
 `position` orders exercises within a workout and sets within an exercise. Gaps are fine.
 

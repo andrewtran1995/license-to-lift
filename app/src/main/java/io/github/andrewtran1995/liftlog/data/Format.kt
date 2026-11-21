@@ -1,7 +1,10 @@
 package io.github.andrewtran1995.liftlog.data
 
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 private val dayFormat = DateTimeFormatter.ofPattern("EEE, MMM d")
 private val dayYearFormat = DateTimeFormatter.ofPattern("EEE, MMM d, yyyy")
@@ -38,3 +41,40 @@ fun formatStamp(iso: String): String {
     val d = LocalDate.parse(iso)
     return "$iso · ${d.dayOfWeek.name.take(3)}"
 }
+
+private const val SECOND = 1_000L
+private const val MINUTE = 60 * SECOND
+private const val HOUR = 60 * MINUTE
+
+/**
+ * When a set was logged, for the Log screen: "12s ago" for the first minute, "4m ago" for the
+ * first hour, then the clock time ("7:42 PM"). A time ahead of [now] (clock changed) reads "0s ago".
+ */
+fun formatLoggedAt(
+    loggedAt: Long,
+    now: Long,
+    zone: ZoneId = ZoneId.systemDefault(),
+    clock: DateTimeFormatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT),
+): String {
+    val age = (now - loggedAt).coerceAtLeast(0)
+    return when {
+        age < MINUTE -> "${age / SECOND}s ago"
+        age < HOUR -> "${age / MINUTE}m ago"
+        else -> Instant.ofEpochMilli(loggedAt).atZone(zone).format(clock)
+    }
+}
+
+/**
+ * The next moment any [formatLoggedAt] label for [times] changes, so the screen redraws only
+ * then: each second while a set is under a minute old, each minute while under an hour, and
+ * never once every set shows a clock time. Null means nothing will change.
+ */
+fun nextLoggedAtChange(times: List<Long>, now: Long): Long? = times.mapNotNull { t ->
+    val age = now - t
+    when {
+        age < 0 -> t + SECOND // reads "0s ago" until it's a second old
+        age < MINUTE -> now + (SECOND - age % SECOND)
+        age < HOUR -> now + (MINUTE - age % MINUTE)
+        else -> null
+    }
+}.minOrNull()

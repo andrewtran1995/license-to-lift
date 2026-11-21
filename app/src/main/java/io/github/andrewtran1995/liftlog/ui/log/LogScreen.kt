@@ -59,7 +59,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -88,9 +90,12 @@ import io.github.andrewtran1995.liftlog.data.ExerciseWithSets
 import io.github.andrewtran1995.liftlog.data.SessionStore
 import io.github.andrewtran1995.liftlog.data.WorkoutDao
 import io.github.andrewtran1995.liftlog.data.WorkoutWithExercises
+import io.github.andrewtran1995.liftlog.data.formatLoggedAt
 import io.github.andrewtran1995.liftlog.data.formatStamp
 import io.github.andrewtran1995.liftlog.data.formatWeight
+import io.github.andrewtran1995.liftlog.data.nextLoggedAtChange
 import io.github.andrewtran1995.liftlog.data.summarizeSets
+import kotlinx.coroutines.delay
 import io.github.andrewtran1995.liftlog.ui.figures.ExerciseFigure
 import io.github.andrewtran1995.liftlog.ui.theme.Caption
 import io.github.andrewtran1995.liftlog.ui.theme.Mono
@@ -368,6 +373,24 @@ private fun AddExercisePanel(
     }
 }
 
+/**
+ * The current time, updated only when one of the "x ago" labels for [times] would change
+ * (see nextLoggedAtChange), so the screen isn't redrawn every frame.
+ */
+@Composable
+private fun rememberNow(times: List<Long>): State<Long> {
+    val now = remember { mutableLongStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(times) {
+        while (true) {
+            val t = System.currentTimeMillis()
+            now.longValue = t
+            val next = nextLoggedAtChange(times, t) ?: break
+            delay((next - t).coerceAtLeast(1))
+        }
+    }
+    return now
+}
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ExercisePanel(vm: SessionViewModel, ex: ExerciseWithSets, last: LastTime?, next: String?, onNext: () -> Unit) {
@@ -375,6 +398,7 @@ private fun ExercisePanel(vm: SessionViewModel, ex: ExerciseWithSets, last: Last
     val sets = ex.sets.sortedBy { it.position }
     val entry = remember(ex.exercise.id, sets.size, last?.workout?.id) { vm.nextEntry(ex, last) }
     var confirmRemove by remember(ex.exercise.id) { mutableStateOf(false) }
+    val now = rememberNow(sets.mapNotNull { it.loggedAt })
 
     Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -411,6 +435,10 @@ private fun ExercisePanel(vm: SessionViewModel, ex: ExerciseWithSets, last: Last
                         formatWeight(s.weight, vm.unit) + (s.reps?.let { "  ×  $it" } ?: ""),
                         Modifier.weight(1f), style = MaterialTheme.typography.titleMedium,
                     )
+                    // Read `now` here, so only this label redraws when it ticks.
+                    s.loggedAt?.let { t ->
+                        Text(formatLoggedAt(t, now.value), style = MaterialTheme.typography.bodySmall, color = Spy.Muted, maxLines = 1)
+                    }
                     IconButton(onClick = { vm.deleteSet(s, ex.exercise.workoutId) }) {
                         Icon(painterResource(R.drawable.ic_close), contentDescription = "Delete set ${i + 1}", tint = Spy.Muted, modifier = Modifier.size(18.dp))
                     }

@@ -138,7 +138,7 @@ class SessionViewModel(private val dao: WorkoutDao, private val store: SessionSt
         val r = entry.reps?.takeIf { it > 0 }
         writes.withLock {
             val pos = (ex.sets.maxOfOrNull { it.position } ?: -1) + 1
-            dao.upsertSets(listOf(SetEntity(UUID.randomUUID().toString(), ex.exercise.id, pos, w, r)))
+            dao.upsertSets(listOf(SetEntity(UUID.randomUUID().toString(), ex.exercise.id, pos, w, r, loggedAt = System.currentTimeMillis())))
             dao.touchWorkout(ex.exercise.workoutId, System.currentTimeMillis())
         }
     }
