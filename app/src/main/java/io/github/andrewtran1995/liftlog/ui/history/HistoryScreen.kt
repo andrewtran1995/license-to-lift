@@ -15,6 +15,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -37,6 +39,8 @@ fun HistoryScreen(dao: WorkoutDao, contentPadding: PaddingValues) {
     val flow = remember(dao) { dao.observeWorkouts() }
     val workouts by flow.collectAsStateWithLifecycle(initialValue = null)
     val scope = rememberCoroutineScope()
+    var importing by remember { mutableStateOf(false) }
+    if (importing) ImportSheet(dao, onDismiss = { importing = false })
     val list = workouts
     when {
         list == null -> Unit
@@ -45,10 +49,16 @@ fun HistoryScreen(dao: WorkoutDao, contentPadding: PaddingValues) {
                 Caption("// Dossier empty")
                 Text("No missions on file.", style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
                 Text("Log your first session to open the dossier.", color = Spy.Muted, textAlign = TextAlign.Center)
+                TextButton(onClick = { importing = true }) { Text("IMPORT FROM WEB APP", style = MaterialTheme.typography.labelLarge) }
             }
         }
         else -> LazyColumn(contentPadding = contentPadding, verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            item { ScreenHeader("// ${list.size} ON FILE", "Dossier") }
+            item {
+                Row(verticalAlignment = Alignment.Bottom) {
+                    ScreenHeader("// ${list.size} ON FILE", "Dossier", Modifier.weight(1f))
+                    TextButton(onClick = { importing = true }) { Text("IMPORT", style = MaterialTheme.typography.labelLarge) }
+                }
+            }
             itemsIndexed(list) { index, w ->
                 Panel {
                     Row(verticalAlignment = Alignment.CenterVertically) {

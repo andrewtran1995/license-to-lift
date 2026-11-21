@@ -2,6 +2,8 @@ package io.github.andrewtran1995.liftlog.ui.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Shapes
@@ -25,15 +27,15 @@ import io.github.andrewtran1995.liftlog.R
  */
 object Spy {
     val Ink = Color(0xFF05080D)        // page, under the blueprint grid
-    val Panel = Color(0xB80D131B)      // translucent cards: the grid shows faintly through
-    val PanelHi = Color(0xCC141C26)    // inputs, raised
+    val Panel = Color(0xE00D131B)      // translucent cards: the grid shows faintly through
+    val PanelHi = Color(0xF2141C26)    // inputs, raised
     val Wire = Color(0x1FFFFFFF)       // hairlines and borders
     val GridMinor = Color(0x0CFFFFFF)
     val GridMajor = Color(0x16FFFFFF)
     val LampCyan = Color(0xFF1FB8A3)
     val LampIce = Color(0xFF3A6BD6)
     val Text = Color(0xFFE4E8EC)
-    val Muted = Color(0xFF7D8896)
+    val Muted = Color(0xFF93A0AE)
     val Signal = Color(0xFF3FE0C5)     // primary accent
     val Classified = Color(0xFFE5484D) // destructive
 }
@@ -70,7 +72,7 @@ private fun mono(size: Int, weight: FontWeight = FontWeight.Normal, spacing: Dou
     TextStyle(fontFamily = Mono, fontSize = size.sp, fontWeight = weight, letterSpacing = spacing.sp, lineHeight = line.sp)
 
 private val Type = Typography(
-    headlineLarge = mono(28, FontWeight.ExtraBold, 1.0, 32),
+    headlineLarge = mono(30, FontWeight.ExtraBold, 0.5, 36),
     headlineSmall = mono(22, FontWeight.Bold, 0.5, 28),
     titleLarge = mono(18, FontWeight.Bold, 0.5),
     titleMedium = mono(15, FontWeight.Bold, 0.5),
@@ -99,6 +101,9 @@ fun LiftLogTheme(content: @Composable () -> Unit) {
         motionScheme = MotionScheme.expressive(),
         shapes = Corners,
         typography = Type,
-        content = content,
-    )
+    ) {
+        // Screens draw straight on the backdrop rather than on a Surface, so set the default
+        // text and icon colour here, or Text falls back to black.
+        CompositionLocalProvider(LocalContentColor provides Spy.Text, content = content)
+    }
 }

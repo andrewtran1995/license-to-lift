@@ -34,14 +34,32 @@ data class WorkoutEntity(
         childColumns = ["workoutId"],
         onDelete = ForeignKey.CASCADE,
     )],
-    indices = [Index("workoutId"), Index("name")],
+    indices = [Index("workoutId"), Index("name"), Index("typeId")],
 )
 data class ExerciseEntity(
     @PrimaryKey val id: String,
     val workoutId: String,
     val position: Int,
+    /** Display name as logged; kept so old entries read the same even if the catalog changes. */
     val name: String,
+    /** The catalog entry this belongs to; what progress is tracked by. Null only for unmigrated rows. */
+    val typeId: String? = null,
 )
+
+/**
+ * The exercise catalog: the discrete set of exercises you log against, so "Leg curls" in March
+ * and "leg curls " in May are the same line on the chart. [nameKey] is the trimmed, lower-cased
+ * name and is unique.
+ */
+@Entity(tableName = "exercise_types", indices = [Index(value = ["nameKey"], unique = true)])
+data class ExerciseTypeEntity(
+    @PrimaryKey val id: String,
+    val name: String,
+    val nameKey: String,
+    val createdAt: Long,
+)
+
+fun exerciseKey(name: String): String = name.trim().lowercase()
 
 /** A set. Weight and reps are both optional: a set can be just a weight, and bodyweight work has no weight. */
 @Entity(

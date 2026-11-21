@@ -36,6 +36,7 @@ import io.github.andrewtran1995.liftlog.ui.chrome.BlueprintBackdrop
 import io.github.andrewtran1995.liftlog.ui.chrome.GlassNavBar
 import io.github.andrewtran1995.liftlog.ui.chrome.NavItem
 import io.github.andrewtran1995.liftlog.ui.history.HistoryScreen
+import io.github.andrewtran1995.liftlog.ui.intel.IntelScreen
 import io.github.andrewtran1995.liftlog.ui.log.LogScreen
 import io.github.andrewtran1995.liftlog.ui.theme.Caption
 import io.github.andrewtran1995.liftlog.ui.theme.LiftLogTheme
@@ -81,12 +82,7 @@ private fun LiftLogRoot(dao: WorkoutDao) {
                 when (t) {
                     0 -> LogScreen(dao, content, onSaved = { tab = 1 })
                     1 -> HistoryScreen(dao, content)
-                    else -> Box(Modifier.fillMaxSize().padding(content), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Caption("// Intel pending")
-                            Text("Progress charts are next on the roadmap", color = Spy.Muted)
-                        }
-                    }
+                    else -> IntelScreen(dao, content)
                 }
             }
         }

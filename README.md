@@ -33,10 +33,10 @@ Or skip Studio: open the latest **Build** run under the repo's **Actions** tab, 
 - [x] Log a workout (date picker, exercises, sets, notes)
 - [x] History list with delete
 - [ ] Edit a past workout
-- [ ] Exercise name suggestions and "use last time's sets"
-- [ ] Progress charts (heaviest set, estimated 1RM, volume, reps)
+- [x] Exercise catalog (discrete, addable) with "last time" and one-tap reuse
+- [x] Intel: per-exercise progress (heaviest, volume, reps) with chart
 - [ ] Settings: units (DataStore)
-- [ ] Import a backup from the web app (JSON from Settings → Copy backup)
+- [x] Import a backup from the web app (paste or file; idempotent)
 - [ ] Sync (see below)
 
 ## Sync

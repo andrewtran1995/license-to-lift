@@ -49,6 +49,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import io.github.andrewtran1995.liftlog.R
 import io.github.andrewtran1995.liftlog.data.WorkoutDao
 import io.github.andrewtran1995.liftlog.data.formatStamp
+import io.github.andrewtran1995.liftlog.data.summarizeSets
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.andrewtran1995.liftlog.ui.theme.Caption
 import io.github.andrewtran1995.liftlog.ui.theme.Mono
 import io.github.andrewtran1995.liftlog.ui.theme.Panel
@@ -85,6 +87,8 @@ fun LogScreen(dao: WorkoutDao, contentPadding: PaddingValues, onSaved: () -> Uni
     val vm: LogViewModel = viewModel(factory = viewModelFactory { initializer { LogViewModel(dao) } })
     val context = LocalContext.current
     var pickingDate by remember { mutableStateOf(false) }
+    val catalog by vm.catalog.collectAsStateWithLifecycle()
+    val history by vm.workouts.collectAsStateWithLifecycle()
 
     LazyColumn(
         Modifier.imePadding(),
@@ -111,14 +115,30 @@ fun LogScreen(dao: WorkoutDao, contentPadding: PaddingValues, onSaved: () -> Uni
         items(vm.exercises) { ex ->
             Panel {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    OutlinedTextField(
-                        ex.name, { ex.name = it }, Modifier.weight(1f),
-                        placeholder = { Text("Exercise") },
-                        textStyle = MaterialTheme.typography.titleMedium,
-                        singleLine = true, colors = fieldColors(),
+                    ExercisePicker(
+                        value = ex.name,
+                        catalog = catalog,
+                        colors = fieldColors(),
+                        onValueChange = { ex.name = it; ex.typeId = null },
+                        onPick = { vm.pick(ex, it) },
+                        onAdd = { vm.addToCatalog(ex, it) },
+                        modifier = Modifier.weight(1f),
                     )
                     IconButton(onClick = { vm.removeExercise(ex) }, Modifier.width(RemoveWidth)) {
                         Icon(painterResource(R.drawable.ic_close), contentDescription = "Remove exercise", tint = Spy.Muted)
+                    }
+                }
+                val last = remember(ex.name, ex.typeId, history) { vm.lastTime(ex) }
+                if (last != null) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Caption("Last · ${formatStamp(last.workout.date)}")
+                            Text(
+                                summarizeSets(last.exercise.sets, last.workout.unit),
+                                style = MaterialTheme.typography.bodyMedium, color = Spy.Signal,
+                            )
+                        }
+                        TextButton(onClick = { vm.useLastTime(ex) }) { Text("USE", style = MaterialTheme.typography.labelLarge) }
                     }
                 }
                 // Column captions once per exercise, so the fields need no labels and stay one line high.
