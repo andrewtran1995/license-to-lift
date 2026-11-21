@@ -11,7 +11,7 @@ import re
 import sys
 from collections import Counter
 
-SCHEMA_VERSION = 2  # keep equal to DatabaseDump.SCHEMA_VERSION
+SCHEMA_VERSION = 3  # keep equal to DatabaseDump.SCHEMA_VERSION
 
 
 def check(doc, schema=SCHEMA_VERSION):
@@ -51,6 +51,10 @@ def check(doc, schema=SCHEMA_VERSION):
     wids = {w.get("id") for w in workouts}
     eids = {e.get("id") for e in exercises}
     errors += [f"exercise {e.get('id')} -> missing workout {e.get('workoutId')}" for e in exercises if e.get("workoutId") not in wids]
+    for s in sets:
+        t = s.get("loggedAt")
+        if t is not None and (isinstance(t, bool) or not isinstance(t, int) or t < 0):
+            errors.append(f"set {s.get('id')} loggedAt {t!r} is not epoch milliseconds or null")
     errors += [f"set {s.get('id')} -> missing exercise {s.get('exerciseId')}" for s in sets if s.get("exerciseId") not in eids]
     return errors
 

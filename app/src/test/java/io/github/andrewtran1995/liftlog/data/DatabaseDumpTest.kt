@@ -16,7 +16,7 @@ class DatabaseDumpTest {
             ExerciseEntity("e1", "w1", 0, "Leg curls", "t1"),
             ExerciseEntity("e2", "w1", 1, "Knee lifts", null),
         ),
-        sets = listOf(SetEntity("s1", "e1", 0, 90.0, 10), SetEntity("s2", "e1", 1, 90.0, null)),
+        sets = listOf(SetEntity("s1", "e1", 0, 90.0, 10, loggedAt = 1_795_290_000_000L), SetEntity("s2", "e1", 1, 90.0, null)),
     )
 
     @Test fun roundTripKeepsEveryRow() {
@@ -50,5 +50,13 @@ class DatabaseDumpTest {
     @Test fun recomputesNameKeyFromName() {
         val edited = DatabaseDump.toJson(sample).replace("\"nameKey\": \"leg curls\"", "\"nameKey\": \"stale\"")
         assertEquals("leg curls", DatabaseDump.parse(edited).types.single().nameKey)
+    }
+
+    @Test fun olderSchemaSetsHaveNoTime() {
+        val v2 = """{"app":"license-to-lift","format":"database","schemaVersion":2,"exportedAt":1,"tables":{
+            "workouts":[{"id":"w1","date":"2026-11-16","unit":"lb"}],
+            "exercises":[{"id":"e1","workoutId":"w1","position":0,"name":"Leg curls","typeId":null}],
+            "sets":[{"id":"s1","exerciseId":"e1","position":0,"weight":90,"reps":10}]}}"""
+        assertEquals(null, DatabaseDump.parse(v2).sets.single().loggedAt)
     }
 }

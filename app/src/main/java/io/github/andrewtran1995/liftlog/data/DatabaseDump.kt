@@ -20,7 +20,7 @@ data class DatabaseDump(
         const val APP = "license-to-lift"
         const val FORMAT = "database"
         /** Keep equal to the Room database version in LiftLogDatabase. */
-        const val SCHEMA_VERSION = 2
+        const val SCHEMA_VERSION = 3
 
         /** True if [text] looks like a full-database dump rather than a web-app backup. */
         fun looksLikeDump(text: String): Boolean =
@@ -49,7 +49,8 @@ data class DatabaseDump(
             d.sets.sortedWith(compareBy({ it.exerciseId }, { it.position })).forEach {
                 sets.put(
                     JSONObject().put("id", it.id).put("exerciseId", it.exerciseId).put("position", it.position)
-                        .put("weight", it.weight ?: JSONObject.NULL).put("reps", it.reps ?: JSONObject.NULL),
+                        .put("weight", it.weight ?: JSONObject.NULL).put("reps", it.reps ?: JSONObject.NULL)
+                        .put("loggedAt", it.loggedAt ?: JSONObject.NULL),
                 )
             }
             return JSONObject()
@@ -122,6 +123,8 @@ data class DatabaseDump(
                     position = it.optInt("position", 0),
                     weight = it.nullableDouble("weight")?.takeIf { w -> w > 0 },
                     reps = it.nullableInt("reps")?.takeIf { r -> r > 0 },
+                    // Missing in schema 1–2 files: those sets get no time.
+                    loggedAt = if (!it.has("loggedAt") || it.isNull("loggedAt")) null else it.optLong("loggedAt").takeIf { t -> t > 0 },
                 )
             }
 

@@ -9,7 +9,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [WorkoutEntity::class, ExerciseEntity::class, SetEntity::class, ExerciseTypeEntity::class],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 abstract class LiftLogDatabase : RoomDatabase() {
@@ -18,7 +18,7 @@ abstract class LiftLogDatabase : RoomDatabase() {
     companion object {
         fun create(context: Context): LiftLogDatabase =
             Room.databaseBuilder(context, LiftLogDatabase::class.java, "liftlog.db")
-                .addMigrations(MIGRATION_1_2)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                 .build()
     }
 }
@@ -45,5 +45,12 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
             "UPDATE exercises SET typeId = " +
                 "(SELECT t.id FROM exercise_types t WHERE t.nameKey = lower(trim(exercises.name)))"
         )
+    }
+}
+
+/** v3 records when each set was logged. Sets from before stay null: their real time was never saved. */
+val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE `sets` ADD COLUMN `loggedAt` INTEGER")
     }
 }
