@@ -40,7 +40,8 @@ and install it. Builds are release-optimised and all signed with the same key
 - [x] Intel: per-exercise progress (heaviest, volume, reps) with chart
 - [ ] Settings: units (DataStore)
 - [x] Import a backup from the web app (paste or file; idempotent)
-- [x] Export a backup (same format as the web app)
+- [x] Full-database export (save or share) and import with merge or replace; see `docs/database-format.md`
+- [x] Web app backup export and import
 - [ ] Sync (see below)
 
 ## Sync

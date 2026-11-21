@@ -18,6 +18,23 @@ Room, Haze glass. See `README.md` for the stack and data model.
 - Room schema changes need a version bump and a `Migration` in `LiftLogDatabase.kt` that keeps
   existing data. Never use destructive migration.
 
+## Working with exported databases
+
+The user may send a full-database export (`license-to-lift-db-*.json`, format in
+`docs/database-format.md`) to edit, migrate or inspect, then import it back on the phone.
+
+- **Edit with a script, not by hand.** Load the JSON in Python, change the rows, and write it
+  back with the same structure. Keep every existing id. New rows get new UUIDs. Bump
+  `updatedAt` on any workout you change.
+- **Keep references whole.** Every exercise needs its workout, and every set its exercise, in the
+  same file. Catalog names must stay unique (trimmed, case-insensitive).
+- **To delete a workout, set `"deleted": true`** rather than dropping its rows, so MERGE removes
+  it on the phone too.
+- **Check before handing it back:** `python3 tools/check_dump.py FILE` must print "OK to import".
+- **Tell the user which import mode to use.** MERGE for additions and edits; REPLACE ALL only when
+  the file is the complete intended database (e.g. after a migration or a large cleanup).
+- **New exercises in the catalog** may need a figure: see the next section.
+
 ## Exercise figures
 
 Low-poly animated figures live in `app/src/main/java/.../ui/figures/ExerciseFigure.kt`. To add

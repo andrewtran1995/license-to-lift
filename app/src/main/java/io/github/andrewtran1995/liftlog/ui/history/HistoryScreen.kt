@@ -15,12 +15,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import io.github.andrewtran1995.liftlog.data.BackupExport
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import java.time.LocalDate
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import io.github.andrewtran1995.liftlog.data.SessionStore
@@ -51,18 +45,7 @@ fun HistoryScreen(dao: WorkoutDao, store: SessionStore, contentPadding: PaddingV
     val context = LocalContext.current
     val activeId by store.activeId.collectAsStateWithLifecycle()
     var importing by remember { mutableStateOf(false) }
-    val export = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
-        val all = workouts
-        if (uri != null && all != null) scope.launch {
-            val ok = withContext(Dispatchers.IO) {
-                runCatching {
-                    context.contentResolver.openOutputStream(uri)?.bufferedWriter()?.use { it.write(BackupExport.toJson(all)) }
-                }.isSuccess
-            }
-            Toast.makeText(context, if (ok) "Exported ${all.size} missions" else "Export failed", Toast.LENGTH_SHORT).show()
-        }
-    }
-    if (importing) ImportSheet(dao, onDismiss = { importing = false })
+    if (importing) DataSheet(dao, store, onDismiss = { importing = false })
     val list = workouts
     when {
         list == null -> Unit
@@ -71,17 +54,14 @@ fun HistoryScreen(dao: WorkoutDao, store: SessionStore, contentPadding: PaddingV
                 Caption("// Dossier empty")
                 Text("No missions on file.", style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
                 Text("Log your first session to open the dossier.", color = Spy.Muted, textAlign = TextAlign.Center)
-                TextButton(onClick = { importing = true }) { Text("IMPORT FROM WEB APP", style = MaterialTheme.typography.labelLarge) }
+                TextButton(onClick = { importing = true }) { Text("IMPORT DATA", style = MaterialTheme.typography.labelLarge) }
             }
         }
         else -> LazyColumn(contentPadding = contentPadding, verticalArrangement = Arrangement.spacedBy(10.dp)) {
             item {
                 Row(verticalAlignment = Alignment.Bottom) {
                     ScreenHeader("// ${list.size} ON FILE", "Dossier", Modifier.weight(1f))
-                    TextButton(onClick = { importing = true }) { Text("IMPORT", style = MaterialTheme.typography.labelLarge) }
-                    TextButton(onClick = { export.launch("license-to-lift-backup-${LocalDate.now()}.json") }) {
-                        Text("EXPORT", style = MaterialTheme.typography.labelLarge)
-                    }
+                    TextButton(onClick = { importing = true }) { Text("DATA", style = MaterialTheme.typography.labelLarge) }
                 }
             }
             itemsIndexed(list, key = { _, w -> w.workout.id }) { index, w ->

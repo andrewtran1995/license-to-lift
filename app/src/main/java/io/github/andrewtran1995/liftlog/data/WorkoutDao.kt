@@ -71,6 +71,64 @@ abstract class WorkoutDao {
     @Query("UPDATE workouts SET updatedAt = :now, dirty = 1 WHERE id = :id")
     abstract suspend fun touchWorkout(id: String, now: Long)
 
+    // ---- full-database export / import ----
+
+    @Query("SELECT * FROM exercise_types") abstract suspend fun allTypes(): List<ExerciseTypeEntity>
+    @Query("SELECT * FROM workouts") abstract suspend fun allWorkoutRows(): List<WorkoutEntity>
+    @Query("SELECT * FROM exercises") abstract suspend fun allExerciseRows(): List<ExerciseEntity>
+    @Query("SELECT * FROM sets") abstract suspend fun allSetRows(): List<SetEntity>
+    @Query("SELECT * FROM exercise_types WHERE id = :id") abstract suspend fun typeById(id: String): ExerciseTypeEntity?
+    @Upsert abstract suspend fun upsertTypes(types: List<ExerciseTypeEntity>)
+    @Query("DELETE FROM sets") abstract suspend fun wipeSets()
+    @Query("DELETE FROM exercises") abstract suspend fun wipeExercises()
+    @Query("DELETE FROM workouts") abstract suspend fun wipeWorkouts()
+    @Query("DELETE FROM exercise_types") abstract suspend fun wipeTypes()
+
+    /** Every row of every table, including deleted (tombstoned) workouts. */
+    @Transaction
+    open suspend fun dump(): DatabaseDump = DatabaseDump(
+        schemaVersion = DatabaseDump.SCHEMA_VERSION,
+        exportedAt = System.currentTimeMillis(),
+        types = allTypes(),
+        workouts = allWorkoutRows(),
+        exercises = allExerciseRows(),
+        sets = allSetRows(),
+    )
+
+    /**
+     * Applies a parsed dump in one transaction: it all lands or none of it does.
+     *
+     * Replace: empties every table first, so the database becomes exactly the file.
+     * Merge: rows in the file win; each workout in the file has its exercises and sets replaced
+     * by the file's; nothing outside the file is touched. A catalog entry whose name already
+     * exists under another id is folded into the existing one.
+     */
+    @Transaction
+    open suspend fun importDump(d: DatabaseDump, replace: Boolean): ImportResult {
+        if (replace) { wipeSets(); wipeExercises(); wipeWorkouts(); wipeTypes() }
+
+        val remap = mutableMapOf<String, String>()
+        for (t in d.types) {
+            val byKey = typeByKey(t.nameKey)
+            if (byKey != null && byKey.id != t.id) remap[t.id] = byKey.id
+            else upsertTypes(listOf(t))
+        }
+        for (w in d.workouts) {
+            clearSetsForWorkout(w.id)
+            clearExercises(w.id)
+            upsertWorkout(w)
+        }
+        val fileTypeIds = d.types.map { it.id }.toSet()
+        val exercises = d.exercises.map { e ->
+            val typeId = e.typeId?.let { remap[it] ?: it.takeIf { id -> id in fileTypeIds || typeById(id) != null } }
+                ?: ensureType(e.name).id
+            e.copy(typeId = typeId)
+        }
+        upsertExercises(exercises)
+        upsertSets(d.sets)
+        return ImportResult(d.workouts.size, exercises.size, d.sets.size, d.types.size - remap.size)
+    }
+
     @Upsert abstract suspend fun upsertWorkout(workout: WorkoutEntity)
     @Upsert abstract suspend fun upsertExercises(exercises: List<ExerciseEntity>)
     @Upsert abstract suspend fun upsertSets(sets: List<SetEntity>)

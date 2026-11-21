@@ -75,4 +75,5 @@ dependencies {
     implementation(libs.haze.glass)
 
     testImplementation(libs.junit)
+    testImplementation(libs.org.json)
 }
