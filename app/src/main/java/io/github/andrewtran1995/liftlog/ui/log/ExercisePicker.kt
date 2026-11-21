@@ -1,10 +1,10 @@
 package io.github.andrewtran1995.liftlog.ui.log
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -15,16 +15,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.PopupProperties
 import io.github.andrewtran1995.liftlog.data.ExerciseTypeEntity
 import io.github.andrewtran1995.liftlog.data.exerciseKey
 import io.github.andrewtran1995.liftlog.ui.theme.Spy
 
 /**
  * Exercise field backed by the catalog. Typing filters the catalog; a name that isn't in it yet
- * can be added with one tap, so every logged exercise maps to one catalog entry.
+ * can be added with one tap, so every logged exercise maps to one catalog entry. The suggestion
+ * menu doesn't take focus, so the keyboard stays up while you type.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExercisePicker(
     value: String,
@@ -35,41 +39,42 @@ fun ExercisePicker(
     onAdd: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    var focused by remember { mutableStateOf(false) }
+    var dismissed by remember { mutableStateOf(false) }
+    var widthPx by remember { mutableStateOf(0) }
     val key = exerciseKey(value)
-    val matches = catalog.filter { key.isEmpty() || it.nameKey.contains(key) }.take(8)
-    val exact = catalog.any { it.nameKey == key }
+    val matches = catalog.filter { (key.isEmpty() || it.nameKey.contains(key)) && it.nameKey != key }.take(8)
+    val showAdd = key.isNotEmpty() && catalog.none { it.nameKey == key }
+    val expanded = focused && !dismissed && (matches.isNotEmpty() || showAdd)
 
-    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }, modifier = modifier) {
+    Box(modifier.onSizeChanged { widthPx = it.width }) {
         OutlinedTextField(
             value = value,
-            onValueChange = { onValueChange(it); expanded = true },
-            modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable),
+            onValueChange = { onValueChange(it); dismissed = false },
+            modifier = Modifier.fillMaxWidth().onFocusChanged { focused = it.isFocused; if (it.isFocused) dismissed = false },
             placeholder = { Text("Exercise") },
             textStyle = MaterialTheme.typography.titleMedium,
             singleLine = true,
             colors = colors,
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
         )
-        val showAdd = key.isNotEmpty() && !exact
-        if (matches.isNotEmpty() || showAdd) {
-            ExposedDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                containerColor = Spy.PanelHi,
-            ) {
-                matches.forEach { type ->
-                    DropdownMenuItem(
-                        text = { Text(type.name, style = MaterialTheme.typography.bodyLarge) },
-                        onClick = { onPick(type); expanded = false },
-                    )
-                }
-                if (showAdd) {
-                    DropdownMenuItem(
-                        text = { Text("+ Add “${value.trim()}” to catalog", color = Spy.Signal, style = MaterialTheme.typography.bodyLarge) },
-                        onClick = { onAdd(value); expanded = false },
-                    )
-                }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { dismissed = true },
+            properties = PopupProperties(focusable = false),
+            containerColor = Spy.PanelHi,
+            modifier = Modifier.width(with(LocalDensity.current) { widthPx.toDp() }.coerceAtLeast(200.dp)),
+        ) {
+            matches.forEach { type ->
+                DropdownMenuItem(
+                    text = { Text(type.name, style = MaterialTheme.typography.bodyLarge) },
+                    onClick = { onPick(type); dismissed = true },
+                )
+            }
+            if (showAdd) {
+                DropdownMenuItem(
+                    text = { Text("+ Add “${value.trim()}” to catalog", color = Spy.Signal, style = MaterialTheme.typography.bodyLarge) },
+                    onClick = { onAdd(value); dismissed = true },
+                )
             }
         }
     }
