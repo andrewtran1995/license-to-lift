@@ -30,7 +30,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 
 /** Exercises that have a drawn figure. Anything else gets the generic barbell. */
-enum class FigureKind { Adductor, Abduction, KneeLift, LegCurl, ChestPress, ShoulderPress }
+enum class FigureKind { Adductor, Abduction, KneeLift, LegCurl, ChestPress, ShoulderPress, Pulldown, Butterfly, SeatedDip, LateralRaise }
 
 /** Matches a catalog name to a figure by keyword, so "Seated leg curl" still finds one. */
 fun figureFor(name: String): FigureKind? {
@@ -40,6 +40,11 @@ fun figureFor(name: String): FigureKind? {
         "abduct" in n -> FigureKind.Abduction
         "knee" in n -> FigureKind.KneeLift
         "curl" in n && "leg" in n -> FigureKind.LegCurl
+        // Before "fly" and "shoulder": a delt machine is drawn as a lateral raise.
+        "delt" in n || "lateral" in n -> FigureKind.LateralRaise
+        "butterfly" in n || "pec deck" in n || "fly" in n -> FigureKind.Butterfly
+        "pulldown" in n || "pull down" in n || "pull-down" in n -> FigureKind.Pulldown
+        "dip" in n -> FigureKind.SeatedDip
         "chest" in n || "bench" in n -> FigureKind.ChestPress
         "shoulder" in n || "overhead" in n -> FigureKind.ShoulderPress
         else -> null
@@ -96,6 +101,10 @@ fun ExerciseFigure(name: String, modifier: Modifier = Modifier, animated: Boolea
                     FigureKind.LegCurl -> legCurl(p)
                     FigureKind.ChestPress -> chestPress(p)
                     FigureKind.ShoulderPress -> shoulderPress(p)
+                    FigureKind.Pulldown -> pulldown(p)
+                    FigureKind.Butterfly -> butterfly(p)
+                    FigureKind.SeatedDip -> seatedDip(p)
+                    FigureKind.LateralRaise -> lateralRaise(p)
                     null -> barbell()
                 }
             }
@@ -235,6 +244,81 @@ private fun DrawScope.shoulderPress(p: Float) {
                 box(Machine, 109f, 19f, 4f, 10f, 1f)
                 box(Machine, 123f, 19f, 4f, 10f, 1f)
             }
+        }
+    }
+    arm(Body)
+    mirrored { arm(Facet) }
+    head(80f, 28f, 10f)
+}
+
+/** Front view: bar pulled from overhead down to the chin; forearms stay vertical. */
+private fun DrawScope.pulldown(p: Float) {
+    limb(Machine, 2f, 80f, 2f, 80f, 8f)
+    translate(0f, lerp(0f, 21f, p)) {
+        limb(Machine, 1.5f, 80f, 8f, 80f, 0f)
+        box(Pad, 36f, 4f, 88f, 4f)
+    }
+    seat()
+    box(Machine, 62f, 92f, 36f, 6f) // knee pad
+    limb(Facet, 8f, 73f, 86f, 70f, 110f, 70f, 130f)
+    limb(Facet, 8f, 87f, 86f, 90f, 110f, 90f, 130f)
+    frontTorso()
+    val arm: DrawScope.(Color) -> Unit = { c ->
+        rotate(lerp(-75f, 0f, p), pivot = Offset(96f, 48f)) {
+            limb(c, 7f, 96f, 48f, 118f, 48f)
+            rotate(lerp(75f, 0f, p), pivot = Offset(118f, 48f)) { limb(c, 6f, 118f, 48f, 118f, 28f) }
+        }
+    }
+    arm(Body)
+    mirrored { arm(Facet) }
+    head(80f, 28f, 10f)
+}
+
+/** Front view pec deck: elbows swing in from the sides until the pads meet in front. */
+private fun DrawScope.butterfly(p: Float) {
+    seat()
+    limb(Facet, 8f, 73f, 86f, 70f, 110f, 70f, 130f)
+    limb(Facet, 8f, 87f, 86f, 90f, 110f, 90f, 130f)
+    frontTorso()
+    val arm: DrawScope.(Color) -> Unit = { c ->
+        val elbow = lerp(122f, 88f, p)
+        limb(c, 7f, 96f, 50f, elbow, 50f)
+        limb(c, 6f, elbow, 50f, elbow, 28f)
+        box(Pad, elbow + 2f, 26f, 5f, 26f, 1.5f)
+    }
+    mirrored { arm(Facet) }
+    arm(Body)
+    head(80f, 28f, 10f)
+}
+
+/** Side view, facing right: hands press the handles from armpit height down to the hips. */
+private fun DrawScope.seatedDip(p: Float) {
+    box(Machine, 40f, 40f, 6f, 62f)
+    box(Machine, 44f, 98f, 44f, 6f)
+    limb(Facet, 8f, 58f, 98f, 86f, 98f, 88f, 126f)
+    poly(Body, 50f, 46f, 66f, 46f, 64f, 98f, 52f, 98f)
+    poly(Facet, 58f, 46f, 66f, 46f, 64f, 98f, 58f, 98f)
+    rotate(lerp(50f, 0f, p), pivot = Offset(58f, 52f)) {
+        limb(Body, 7f, 58f, 52f, 58f, 74f)
+        rotate(lerp(-100f, 0f, p), pivot = Offset(58f, 74f)) {
+            limb(Body, 6f, 58f, 74f, 58f, 94f)
+            box(Pad, 52f, 92f, 16f, 5f, 1.5f)
+        }
+    }
+    head(60f, 32f, 9f)
+}
+
+/** Front view lateral raise machine: arms lift from the sides to shoulder height, pads at the elbows. */
+private fun DrawScope.lateralRaise(p: Float) {
+    seat()
+    limb(Facet, 8f, 73f, 86f, 70f, 110f, 70f, 130f)
+    limb(Facet, 8f, 87f, 86f, 90f, 110f, 90f, 130f)
+    frontTorso()
+    val arm: DrawScope.(Color) -> Unit = { c ->
+        rotate(lerp(-10f, -85f, p), pivot = Offset(96f, 48f)) {
+            limb(c, 7f, 96f, 48f, 96f, 70f)
+            box(Pad, 91f, 62f, 10f, 5f, 1.5f)
+            rotate(lerp(0f, 10f, p), pivot = Offset(96f, 70f)) { limb(c, 6f, 96f, 70f, 96f, 88f) }
         }
     }
     arm(Body)

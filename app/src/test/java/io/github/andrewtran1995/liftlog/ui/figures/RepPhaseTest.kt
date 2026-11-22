@@ -32,6 +32,12 @@ class RepPhaseTest {
         assertEquals(FigureKind.LegCurl, figureFor("Seated leg curls"))
         assertEquals(FigureKind.Adductor, figureFor("Adductor machine"))
         assertEquals(FigureKind.Abduction, figureFor("Hip abduction"))
+        assertEquals(FigureKind.Pulldown, figureFor("Pulldown"))
+        assertEquals(FigureKind.Butterfly, figureFor("Butterfly machine"))
+        assertEquals(FigureKind.SeatedDip, figureFor("Seated dip"))
+        assertEquals(FigureKind.LateralRaise, figureFor("Delt machine"))
+        assertEquals(FigureKind.ShoulderPress, figureFor("Shoulder press"))
+        assertEquals(FigureKind.ChestPress, figureFor("Chest press"))
         assertEquals(null, figureFor("Deadlift"))
     }
 }
