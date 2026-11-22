@@ -4,7 +4,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
@@ -12,7 +11,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
@@ -44,11 +42,14 @@ fun Caption(text: String, modifier: Modifier = Modifier) {
     Text(text.uppercase(), modifier, style = MaterialTheme.typography.labelSmall, color = Spy.Muted, maxLines = 1)
 }
 
-/** Left label, right readout, on one line. */
+/**
+ * A label with its readout underneath: name or date on top, sets below in signal cyan.
+ * Stacked rather than side by side so a long set list wraps instead of squeezing the label.
+ */
 @Composable
 fun ReadoutRow(label: String, value: String) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
-        Text(label, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+    Column(Modifier.fillMaxWidth()) {
+        Text(label, style = MaterialTheme.typography.bodyLarge)
         Text(value, style = MaterialTheme.typography.bodyMedium, color = Spy.Signal)
     }
 }

@@ -36,6 +36,9 @@ import io.github.andrewtran1995.liftlog.ui.theme.ReadoutRow
 import io.github.andrewtran1995.liftlog.ui.theme.ScreenHeader
 import io.github.andrewtran1995.liftlog.ui.theme.Spy
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.layout.fillMaxWidth
+import kotlinx.coroutines.delay
+import androidx.compose.runtime.LaunchedEffect
 
 @Composable
 fun HistoryScreen(dao: WorkoutDao, store: SessionStore, contentPadding: PaddingValues, onEdit: () -> Unit) {
@@ -45,6 +48,8 @@ fun HistoryScreen(dao: WorkoutDao, store: SessionStore, contentPadding: PaddingV
     val context = LocalContext.current
     val activeId by store.activeId.collectAsStateWithLifecycle()
     var importing by remember { mutableStateOf(false) }
+    var armedBurn by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(armedBurn) { if (armedBurn != null) { delay(3_000); armedBurn = null } }
     if (importing) DataSheet(dao, store, onDismiss = { importing = false })
     val list = workouts
     when {
@@ -66,18 +71,24 @@ fun HistoryScreen(dao: WorkoutDao, store: SessionStore, contentPadding: PaddingV
             }
             itemsIndexed(list, key = { _, w -> w.workout.id }) { index, w ->
                 Panel {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Column(Modifier.weight(1f)) {
-                            Text(
-                                (if (w.workout.id == activeId) "IN PROGRESS  ·  " else "FILE %03d  ·  ".format(list.size - index)) + formatStamp(w.workout.date),
-                                style = MaterialTheme.typography.labelMedium, color = Spy.Signal,
-                            )
-                            Text(
-                                "OP: " + w.workout.name.ifBlank { "Untitled" }.uppercase(),
-                                style = MaterialTheme.typography.titleLarge,
-                            )
-                        }
-                        val live = w.workout.id == activeId
+                    val live = w.workout.id == activeId
+                    Text(
+                        (if (live) "IN PROGRESS  ·  " else "FILE %03d  ·  ".format(list.size - index)) + formatStamp(w.workout.date),
+                        style = MaterialTheme.typography.labelMedium, color = Spy.Signal,
+                    )
+                    Text(
+                        "OP: " + w.workout.name.ifBlank { "Untitled" }.uppercase(),
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                    HorizontalDivider(color = Spy.Wire)
+                    w.exercises.sortedBy { it.exercise.position }.forEach { e ->
+                        ReadoutRow(e.exercise.name, summarizeSets(e.sets, w.workout.unit))
+                    }
+                    if (w.workout.notes.isNotBlank()) {
+                        Text("> " + w.workout.notes, style = MaterialTheme.typography.bodySmall, color = Spy.Muted)
+                    }
+                    // Actions sit at the bottom so the file line and title get the full width.
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                         TextButton(onClick = {
                             if (activeId != null && !live) {
                                 Toast.makeText(context, "Finish the mission in progress first", Toast.LENGTH_SHORT).show()
@@ -87,16 +98,16 @@ fun HistoryScreen(dao: WorkoutDao, store: SessionStore, contentPadding: PaddingV
                         }) {
                             Text(if (live) "RESUME" else "EDIT", style = MaterialTheme.typography.labelMedium, color = Spy.Signal)
                         }
-                        if (!live) TextButton(onClick = { scope.launch { dao.markDeleted(w.workout.id, System.currentTimeMillis()) } }) {
-                            Text("BURN", style = MaterialTheme.typography.labelMedium, color = Spy.Classified)
+                        if (!live) {
+                            // Two taps: BURN arms, CONFIRM deletes; it disarms after 3 seconds.
+                            val armed = armedBurn == w.workout.id
+                            TextButton(onClick = {
+                                if (armed) { armedBurn = null; scope.launch { dao.markDeleted(w.workout.id, System.currentTimeMillis()) } }
+                                else armedBurn = w.workout.id
+                            }) {
+                                Text(if (armed) "CONFIRM" else "BURN", style = MaterialTheme.typography.labelMedium, color = Spy.Classified)
+                            }
                         }
-                    }
-                    HorizontalDivider(color = Spy.Wire)
-                    w.exercises.sortedBy { it.exercise.position }.forEach { e ->
-                        ReadoutRow(e.exercise.name, summarizeSets(e.sets, w.workout.unit))
-                    }
-                    if (w.workout.notes.isNotBlank()) {
-                        Text("> " + w.workout.notes, style = MaterialTheme.typography.bodySmall, color = Spy.Muted)
                     }
                 }
             }
