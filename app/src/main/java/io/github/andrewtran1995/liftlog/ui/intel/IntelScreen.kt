@@ -115,6 +115,7 @@ fun IntelScreen(dao: WorkoutDao, contentPadding: PaddingValues) {
                         onClick = { selectedId = t.id },
                         label = { Text(t.name, maxLines = 1) },
                         leadingIcon = { ExerciseFigure(t.name, Modifier.size(width = 28.dp, height = 24.dp)) },
+                        modifier = Modifier.height(io.github.andrewtran1995.liftlog.ui.log.ChipHeight),
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = Spy.Signal.copy(alpha = 0.18f),
                             selectedLabelColor = Spy.Signal,

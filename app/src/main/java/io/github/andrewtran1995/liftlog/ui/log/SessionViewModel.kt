@@ -58,6 +58,22 @@ class SessionViewModel(private val dao: WorkoutDao, private val store: SessionSt
     /** Index of the exercise tab on screen; equal to the exercise count when the add panel is open. */
     var selected by mutableIntStateOf(0)
 
+    /** The mission whose tab selection has been settled, so it isn't reset on every visit. */
+    private var selectedFor: String? = null
+
+    /**
+     * Selects the exercise you were last working on: the one with the most recently logged set,
+     * or the newest one if nothing is logged yet. Runs once per mission (opening or resuming it);
+     * switching tabs keeps whatever you had selected.
+     */
+    fun selectLatest(missionId: String, exercises: List<ExerciseWithSets>) {
+        if (selectedFor == missionId) return
+        selectedFor = missionId
+        val lastLogged = exercises.map { e -> e.sets.maxOfOrNull { it.loggedAt ?: 0L } ?: 0L }
+        val best = lastLogged.max()
+        selected = if (best <= 0L) exercises.lastIndex else lastLogged.lastIndexOf(best)
+    }
+
     private val writes = Mutex() // keeps rapid taps from interleaving positions
 
     private suspend fun ensureWorkout(): String {
@@ -98,6 +114,7 @@ class SessionViewModel(private val dao: WorkoutDao, private val store: SessionSt
     fun addExercise(type: ExerciseTypeEntity) = viewModelScope.launch {
         writes.withLock {
             val wid = ensureWorkout()
+            selectedFor = wid
             val index = exercisesNow().size
             val pos = (exercisesNow().maxOfOrNull { it.exercise.position } ?: -1) + 1
             dao.upsertExercises(listOf(ExerciseEntity(UUID.randomUUID().toString(), wid, pos, type.name, type.id)))
@@ -114,6 +131,7 @@ class SessionViewModel(private val dao: WorkoutDao, private val store: SessionSt
     fun repeat(from: WorkoutWithExercises) = viewModelScope.launch {
         writes.withLock {
             val wid = ensureWorkout()
+            selectedFor = wid
             val have = exercisesNow().mapNotNull { it.exercise.typeId }.toMutableSet()
             var pos = (exercisesNow().maxOfOrNull { it.exercise.position } ?: -1) + 1
             val firstNew = exercisesNow().size
@@ -170,6 +188,7 @@ class SessionViewModel(private val dao: WorkoutDao, private val store: SessionSt
         val filed = s != null && s.exercises.isNotEmpty()
         if (s != null && !filed) dao.markDeleted(s.workout.id, System.currentTimeMillis())
         store.set(null)
+        selectedFor = null
         selected = 0
         onDone(filed)
     }
@@ -177,6 +196,7 @@ class SessionViewModel(private val dao: WorkoutDao, private val store: SessionSt
     fun discard() = viewModelScope.launch {
         store.activeId.value?.let { dao.markDeleted(it, System.currentTimeMillis()) }
         store.set(null)
+        selectedFor = null
         selected = 0
     }
 
@@ -185,7 +205,7 @@ class SessionViewModel(private val dao: WorkoutDao, private val store: SessionSt
         val active = store.activeId.value
         if (active != null && active != id) return false
         store.set(id)
-        selected = 0
+        selectedFor = null
         return true
     }
 

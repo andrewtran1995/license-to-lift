@@ -118,6 +118,9 @@ internal fun fieldColors() = OutlinedTextFieldDefaults.colors(
     focusedPlaceholderColor = Spy.Muted,
 )
 
+/** Every exercise chip is this tall, whatever its figure, matching the pinned + button. */
+internal val ChipHeight = 40.dp
+
 private val BigNumber = TextStyle(fontFamily = Mono, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp, textAlign = TextAlign.Center)
 
 @Composable
@@ -144,7 +147,11 @@ fun LogScreen(dao: WorkoutDao, store: SessionStore, contentPadding: PaddingValue
     val history by vm.history.collectAsStateWithLifecycle()
     var editingDetails by remember { mutableStateOf(false) }
 
-    LaunchedEffect(activeId) { vm.selected = 0 }
+    // Opening (or coming back to) a mission lands on the exercise you were last working on.
+    LaunchedEffect(activeId, session?.exercises?.isNotEmpty()) {
+        val list = session?.exercises?.sortedBy { it.exercise.position }.orEmpty()
+        if (activeId != null && list.isNotEmpty()) vm.selectLatest(activeId!!, list)
+    }
 
     val exercises = session?.exercises?.sortedBy { it.exercise.position }.orEmpty()
     val selected = vm.selected.coerceIn(0, (exercises.size - 1).coerceAtLeast(0))
@@ -210,6 +217,7 @@ fun LogScreen(dao: WorkoutDao, store: SessionStore, contentPadding: PaddingValue
                             label = { Text("${e.exercise.name} · ${e.sets.size}", maxLines = 1) },
                             leadingIcon = { ExerciseFigure(e.exercise.name, Modifier.size(width = 28.dp, height = 24.dp)) },
                             colors = chipColors(),
+                            modifier = Modifier.height(ChipHeight),
                         )
                     }
                 }
@@ -369,6 +377,7 @@ private fun AddExercisePanel(
                             label = { Text(t.name, maxLines = 1) },
                             leadingIcon = { ExerciseFigure(t.name, Modifier.size(width = 28.dp, height = 24.dp)) },
                             colors = chipColors(),
+                            modifier = Modifier.height(ChipHeight),
                         )
                     }
                 }
