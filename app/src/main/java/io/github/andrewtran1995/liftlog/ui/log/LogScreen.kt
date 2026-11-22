@@ -131,7 +131,7 @@ private fun chipColors() = FilterChipDefaults.filterChipColors(
 /**
  * Live logging, one exercise at a time. Exercises sit in a tab row; the current one fills the
  * screen with its sets and an entry panel prefilled from the last set (or from last time), so a
- * straight set is a single tap on LOG SET. Everything saves as you go.
+ * straight set is one half-second hold on LOG SET. Everything saves as you go.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -402,6 +402,10 @@ private fun ExercisePanel(vm: SessionViewModel, ex: ExerciseWithSets, last: Last
     val sets = ex.sets.sortedBy { it.position }
     val entry = remember(ex.exercise.id, sets.size, last?.workout?.id) { vm.nextEntry(ex, last) }
     var confirmRemove by remember(ex.exercise.id) { mutableStateOf(false) }
+    var armedSet by remember(ex.exercise.id) { mutableStateOf<String?>(null) }
+    // Every two-tap confirm cancels itself after 3 seconds.
+    LaunchedEffect(confirmRemove) { if (confirmRemove) { delay(3_000); confirmRemove = false } }
+    LaunchedEffect(armedSet) { if (armedSet != null) { delay(3_000); armedSet = null } }
     val now = rememberNow(sets.mapNotNull { it.loggedAt })
 
     Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -443,8 +447,15 @@ private fun ExercisePanel(vm: SessionViewModel, ex: ExerciseWithSets, last: Last
                     s.loggedAt?.let { t ->
                         Text(formatLoggedAt(t, now.value), style = MaterialTheme.typography.bodySmall, color = Spy.Muted, maxLines = 1)
                     }
-                    IconButton(onClick = { vm.deleteSet(s, ex.exercise.workoutId) }) {
-                        Icon(painterResource(R.drawable.ic_close), contentDescription = "Delete set ${i + 1}", tint = Spy.Muted, modifier = Modifier.size(18.dp))
+                    // Two taps to delete: ✕ arms the row, CONFIRM deletes; it disarms after 3 seconds.
+                    if (armedSet == s.id) {
+                        TextButton(onClick = { armedSet = null; vm.deleteSet(s, ex.exercise.workoutId) }) {
+                            Text("CONFIRM", style = MaterialTheme.typography.labelMedium, color = Spy.Classified)
+                        }
+                    } else {
+                        IconButton(onClick = { armedSet = s.id }) {
+                            Icon(painterResource(R.drawable.ic_close), contentDescription = "Delete set ${i + 1}", tint = Spy.Muted, modifier = Modifier.size(18.dp))
+                        }
                     }
                 }
             }
@@ -473,11 +484,11 @@ private fun ExercisePanel(vm: SessionViewModel, ex: ExerciseWithSets, last: Last
             }
             QuickReps(base = remember(entry) { entry.reps ?: last?.exercise?.sets?.lastOrNull()?.reps ?: 10 }, current = entry.reps, onPick = { entry.reps = it })
             if (entry.fromLastTime) Caption("Prefilled from last time")
-            Button(
-                onClick = { focus.clearFocus(); vm.logSet(ex, entry) },
+            HoldToLogButton(
+                label = "✓  HOLD TO LOG SET %02d".format(sets.size + 1),
+                onConfirm = { focus.clearFocus(); vm.logSet(ex, entry) },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
-                shapes = ButtonDefaults.shapes(),
-            ) { Text("✓  LOG SET %02d".format(sets.size + 1), style = MaterialTheme.typography.labelLarge) }
+            )
             if (next != null) {
                 TextButton(onClick = onNext, modifier = Modifier.align(Alignment.End)) {
                     Text("NEXT: ${next.uppercase()} →", style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
