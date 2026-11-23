@@ -57,7 +57,7 @@ fun HistoryScreen(dao: WorkoutDao, store: SessionStore, contentPadding: PaddingV
         list.isEmpty() -> Box(Modifier.fillMaxSize().padding(contentPadding).padding(16.dp), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Caption("// Dossier empty")
-                Text("No missions on file.", style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
+                Text("no missions on file", style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
                 Text("Log your first session to open the dossier.", color = Spy.Muted, textAlign = TextAlign.Center)
                 TextButton(onClick = { importing = true }) { Text("IMPORT DATA", style = MaterialTheme.typography.labelLarge) }
             }
@@ -73,16 +73,16 @@ fun HistoryScreen(dao: WorkoutDao, store: SessionStore, contentPadding: PaddingV
                 Panel {
                     val live = w.workout.id == activeId
                     Text(
-                        (if (live) "IN PROGRESS  ·  " else "FILE %03d  ·  ".format(list.size - index)) + formatStamp(w.workout.date),
+                        (if (live) "in progress  ·  " else "file %03d  ·  ".format(list.size - index)) + formatStamp(w.workout.date),
                         style = MaterialTheme.typography.labelMedium, color = Spy.Signal,
                     )
                     Text(
-                        "OP: " + w.workout.name.ifBlank { "Untitled" }.uppercase(),
+                        "op: " + w.workout.name.ifBlank { "untitled" }.lowercase(),
                         style = MaterialTheme.typography.titleLarge,
                     )
                     HorizontalDivider(color = Spy.Wire)
                     w.exercises.sortedBy { it.exercise.position }.forEach { e ->
-                        ReadoutRow(e.exercise.name, summarizeSets(e.sets, w.workout.unit))
+                        ReadoutRow(e.exercise.name.lowercase(), summarizeSets(e.sets, w.workout.unit))
                     }
                     if (w.workout.notes.isNotBlank()) {
                         Text("> " + w.workout.notes, style = MaterialTheme.typography.bodySmall, color = Spy.Muted)

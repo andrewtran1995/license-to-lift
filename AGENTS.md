@@ -18,6 +18,13 @@ Room, Haze glass. See `README.md` for the stack and data model.
 - Room schema changes need a version bump and a `Migration` in `LiftLogDatabase.kt` that keeps
   existing data. Never use destructive migration.
 
+## Text style
+
+Space Grotesk (`Sans`) for words, JetBrains Mono (`Mono`) for numbers. Use `.numbers()` on a
+text style for anything mostly digits (weights, reps, set numbers, stats) so columns line up.
+Text is lowercase (titles, captions, labels, tabs, exercise names); buttons that do something
+stay UPPERCASE. Helper sentences keep normal sentence case.
+
 ## Working with exported databases
 
 The user may send a full-database export (`license-to-lift-db-*.json`, format in

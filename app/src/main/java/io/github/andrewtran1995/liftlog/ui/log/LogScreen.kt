@@ -103,6 +103,7 @@ import kotlinx.coroutines.delay
 import io.github.andrewtran1995.liftlog.ui.figures.ExerciseFigure
 import io.github.andrewtran1995.liftlog.ui.theme.Caption
 import io.github.andrewtran1995.liftlog.ui.theme.Mono
+import io.github.andrewtran1995.liftlog.ui.theme.numbers
 import io.github.andrewtran1995.liftlog.ui.theme.Panel
 import io.github.andrewtran1995.liftlog.ui.theme.Spy
 import java.time.Instant
@@ -182,7 +183,7 @@ fun LogScreen(dao: WorkoutDao, store: SessionStore, contentPadding: PaddingValue
             Column(Modifier.weight(1f).clickable(enabled = w != null) { editingDetails = true }) {
                 Caption(if (w == null) "// Standby" else "// Mission active · ${formatStamp(w.date)}")
                 Text(
-                    (w?.name?.ifBlank { null } ?: if (w == null) "Mission log" else "Untitled op").uppercase(),
+                    (w?.name?.ifBlank { null } ?: if (w == null) "mission log" else "untitled op").lowercase(),
                     style = MaterialTheme.typography.headlineLarge, maxLines = 1, overflow = TextOverflow.Ellipsis,
                 )
                 if (w != null && w.name.isBlank()) Caption("Tap to name it")
@@ -218,7 +219,7 @@ fun LogScreen(dao: WorkoutDao, store: SessionStore, contentPadding: PaddingValue
                         FilterChip(
                             selected = i == selected,
                             onClick = { vm.selected = i },
-                            label = { Text("${e.exercise.name} · ${e.sets.size}", maxLines = 1) },
+                            label = { Text("${e.exercise.name.lowercase()} · ${e.sets.size}", maxLines = 1) },
                             leadingIcon = { ExerciseFigure(e.exercise.name, Modifier.size(width = 28.dp, height = 24.dp)) },
                             colors = chipColors(),
                             modifier = Modifier.height(ChipHeight),
@@ -383,11 +384,11 @@ private fun AddExercisePanel(
                 item(key = "repeat-" + w.workout.id) {
                     Panel(Modifier.clickable { onRepeat(w) }) {
                         Text(
-                            "OP: " + w.workout.name.ifBlank { "Untitled" }.uppercase(),
+                            "op: " + w.workout.name.ifBlank { "untitled" }.lowercase(),
                             style = MaterialTheme.typography.titleMedium,
                         )
                         Text(
-                            "${formatStamp(w.workout.date)}  ·  " + w.exercises.sortedBy { it.exercise.position }.joinToString(", ") { it.exercise.name },
+                            "${formatStamp(w.workout.date)}  ·  " + w.exercises.sortedBy { it.exercise.position }.joinToString(", ") { it.exercise.name.lowercase() },
                             style = MaterialTheme.typography.bodySmall, color = Spy.Muted, maxLines = 2, overflow = TextOverflow.Ellipsis,
                         )
                     }
@@ -402,7 +403,7 @@ private fun AddExercisePanel(
                         FilterChip(
                             selected = false,
                             onClick = { pick(t) },
-                            label = { Text(t.name, maxLines = 1) },
+                            label = { Text(t.name.lowercase(), maxLines = 1) },
                             leadingIcon = { ExerciseFigure(t.name, Modifier.size(width = 28.dp, height = 24.dp)) },
                             colors = chipColors(),
                             modifier = Modifier.height(ChipHeight),
@@ -450,11 +451,11 @@ private fun ExercisePanel(vm: SessionViewModel, ex: ExerciseWithSets, last: Last
             // Two slow reps when the exercise opens and after each logged set; tap to replay.
             ExerciseFigure(ex.exercise.name, Modifier.size(width = 72.dp, height = 63.dp), animated = true, playKey = sets.size)
             Column(Modifier.weight(1f)) {
-                Text(ex.exercise.name, style = MaterialTheme.typography.headlineSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(ex.exercise.name.lowercase(), style = MaterialTheme.typography.headlineSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 if (last != null) {
                     Text(
-                        "LAST ${last.workout.date.substring(5)}: " + summarizeSets(last.exercise.sets, last.workout.unit),
-                        style = MaterialTheme.typography.bodySmall, color = Spy.Signal, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        "last ${last.workout.date.substring(5)}: " + summarizeSets(last.exercise.sets, last.workout.unit),
+                        style = MaterialTheme.typography.bodySmall.numbers(), color = Spy.Signal, maxLines = 1, overflow = TextOverflow.Ellipsis,
                     )
                 } else {
                     Caption("First time on file")
@@ -475,10 +476,10 @@ private fun ExercisePanel(vm: SessionViewModel, ex: ExerciseWithSets, last: Last
                     Modifier.fillMaxWidth().height(40.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text("%02d".format(i + 1), Modifier.width(36.dp), style = MaterialTheme.typography.labelLarge, color = Spy.Muted)
+                    Text("%02d".format(i + 1), Modifier.width(36.dp), style = MaterialTheme.typography.labelLarge.numbers(), color = Spy.Muted)
                     Text(
                         formatWeight(s.weight, vm.unit) + (s.reps?.let { "  ×  $it" } ?: ""),
-                        Modifier.weight(1f), style = MaterialTheme.typography.titleMedium,
+                        Modifier.weight(1f), style = MaterialTheme.typography.titleMedium.numbers(),
                     )
                     // Read `now` here, so only this label redraws when it ticks.
                     s.loggedAt?.let { t ->
@@ -563,7 +564,7 @@ private fun QuickReps(base: Int, current: Int?, onPick: (Int) -> Unit) {
             FilterChip(
                 selected = n == current,
                 onClick = { onPick(n) },
-                label = { Text("$n", Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
+                label = { Text("$n", Modifier.fillMaxWidth(), textAlign = TextAlign.Center, style = MaterialTheme.typography.labelLarge.numbers()) },
                 modifier = Modifier.weight(1f),
                 colors = chipColors(),
             )
@@ -591,12 +592,12 @@ private fun DetailsSheet(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Caption("// Mission details")
-            OutlinedTextField(n, { n = it }, Modifier.fillMaxWidth(), label = { Text("Operation") }, placeholder = { Text("e.g. Leg day") }, singleLine = true, colors = fieldColors())
+            OutlinedTextField(n, { n = it }, Modifier.fillMaxWidth(), label = { Text("operation") }, placeholder = { Text("leg day") }, singleLine = true, colors = fieldColors())
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) { Caption("Date"); Text(formatStamp(d.toString()), style = MaterialTheme.typography.titleMedium) }
                 TextButton(onClick = { pickingDate = true }) { Text("CHANGE", style = MaterialTheme.typography.labelLarge) }
             }
-            OutlinedTextField(no, { no = it }, Modifier.fillMaxWidth().height(110.dp), label = { Text("Field notes") }, colors = fieldColors())
+            OutlinedTextField(no, { no = it }, Modifier.fillMaxWidth().height(110.dp), label = { Text("field notes") }, colors = fieldColors())
             Button(onClick = { onSave(n, no, d) }, modifier = Modifier.fillMaxWidth().height(52.dp), shapes = ButtonDefaults.shapes()) {
                 Text("SAVE DETAILS", style = MaterialTheme.typography.labelLarge)
             }

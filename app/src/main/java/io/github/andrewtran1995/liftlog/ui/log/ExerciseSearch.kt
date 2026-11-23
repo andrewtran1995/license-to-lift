@@ -54,7 +54,7 @@ fun ExerciseSearchField(
         value = value,
         onValueChange = onValueChange,
         modifier = modifier.fillMaxWidth(),
-        placeholder = { Text("Search or add an exercise") },
+        placeholder = { Text("search or add an exercise") },
         textStyle = MaterialTheme.typography.titleMedium,
         singleLine = true,
         colors = colors,
@@ -73,7 +73,7 @@ fun ExerciseResultRow(name: String, onClick: () -> Unit, highlight: Boolean = fa
     ) {
         ExerciseFigure(name, Modifier.size(width = 36.dp, height = 32.dp))
         Text(
-            name,
+            name.lowercase(),
             style = MaterialTheme.typography.bodyLarge,
             color = if (highlight) Spy.Signal else Spy.Text,
             maxLines = 1,

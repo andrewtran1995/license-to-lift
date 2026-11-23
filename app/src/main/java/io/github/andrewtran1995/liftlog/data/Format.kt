@@ -36,10 +36,10 @@ fun summarizeSets(sets: List<SetEntity>, unit: String): String {
     }
 }
 
-/** Readout-style date: "2026-11-16 · MON". */
+/** Readout-style date: "2026-11-16 · mon". */
 fun formatStamp(iso: String): String {
     val d = LocalDate.parse(iso)
-    return "$iso · ${d.dayOfWeek.name.take(3)}"
+    return "$iso · ${d.dayOfWeek.name.take(3).lowercase()}"
 }
 
 private const val SECOND = 1_000L

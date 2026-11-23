@@ -191,7 +191,7 @@ fun DataSheet(dao: WorkoutDao, store: SessionStore, onDismiss: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Caption("// Data transfer")
-            Text("EXPORT", style = MaterialTheme.typography.headlineSmall)
+            Text("export", style = MaterialTheme.typography.headlineSmall)
             Text(
                 "The full database has every table and id, so it can be edited and imported back without losing anything.",
                 style = MaterialTheme.typography.bodyMedium, color = Spy.Muted,
@@ -205,12 +205,12 @@ fun DataSheet(dao: WorkoutDao, store: SessionStore, onDismiss: () -> Unit) {
                 }
             }
             TextButton(onClick = { saveWeb.launch("lift-log-backup-$stamp.json") }, enabled = !busy) {
-                Text("Web app backup instead", style = MaterialTheme.typography.labelMedium)
+                Text("WEB APP BACKUP INSTEAD", style = MaterialTheme.typography.labelMedium)
             }
 
             HorizontalDivider(color = Spy.Wire)
 
-            Text("IMPORT", style = MaterialTheme.typography.headlineSmall)
+            Text("import", style = MaterialTheme.typography.headlineSmall)
             Text(
                 "Choose a full database export or a web app backup, or paste its text.",
                 style = MaterialTheme.typography.bodyMedium, color = Spy.Muted,

@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 fun ScreenHeader(code: String, title: String, modifier: Modifier = Modifier) {
     Column(modifier.padding(bottom = 4.dp)) {
         Text(code, style = MaterialTheme.typography.labelMedium, color = Spy.Signal)
-        Text(title.uppercase(), style = MaterialTheme.typography.headlineLarge)
+        Text(title.lowercase(), style = MaterialTheme.typography.headlineLarge)
     }
 }
 
@@ -36,10 +36,10 @@ fun Panel(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> 
     }
 }
 
-/** Small uppercase label used for column headings and field captions. */
+/** Small lowercase label used for column headings and field captions. */
 @Composable
 fun Caption(text: String, modifier: Modifier = Modifier) {
-    Text(text.uppercase(), modifier, style = MaterialTheme.typography.labelSmall, color = Spy.Muted, maxLines = 1)
+    Text(text.lowercase(), modifier, style = MaterialTheme.typography.labelSmall, color = Spy.Muted, maxLines = 1)
 }
 
 /**
@@ -50,6 +50,6 @@ fun Caption(text: String, modifier: Modifier = Modifier) {
 fun ReadoutRow(label: String, value: String) {
     Column(Modifier.fillMaxWidth()) {
         Text(label, style = MaterialTheme.typography.bodyLarge)
-        Text(value, style = MaterialTheme.typography.bodyMedium, color = Spy.Signal)
+        Text(value, style = MaterialTheme.typography.bodyMedium.numbers(), color = Spy.Signal)
     }
 }

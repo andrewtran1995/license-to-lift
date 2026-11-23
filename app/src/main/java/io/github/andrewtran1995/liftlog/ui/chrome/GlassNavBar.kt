@@ -111,7 +111,7 @@ fun GlassNavBar(
                     verticalArrangement = Arrangement.Center,
                 ) {
                     Icon(painterResource(item.icon), contentDescription = null, tint = tint, modifier = Modifier.size(22.dp))
-                    Text(item.label.uppercase(), style = MaterialTheme.typography.labelSmall, color = tint, maxLines = 1)
+                    Text(item.label.lowercase(), style = MaterialTheme.typography.labelSmall, color = tint, maxLines = 1)
                 }
             }
         }

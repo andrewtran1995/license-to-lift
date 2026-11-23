@@ -1,6 +1,6 @@
 # License to Lift
 
-A native Android app for logging gym workouts (exercises, sets, weight and optional reps by date) and tracking progress over time. It's the native successor to the Lift Log web app, styled as a Q-Lab bench at night: a blueprint-grid backdrop, a refracting glass nav bar (Haze), translucent instrument panels, Material 3 Expressive motion, and JetBrains Mono throughout.
+A native Android app for logging gym workouts (exercises, sets, weight and optional reps by date) and tracking progress over time. It's the native successor to the Lift Log web app, styled as a Q-Lab bench at night: a blueprint-grid backdrop, a refracting glass nav bar (Haze), translucent instrument panels, Material 3 Expressive motion, and Space Grotesk for words, JetBrains Mono for numbers, lowercase text with uppercase buttons.
 
 ## Stack
 
@@ -54,4 +54,4 @@ The web version syncs through Claude's artifact storage, which only works inside
 
 ## Credits
 
-JetBrains Mono is bundled under the SIL Open Font License 1.1 (`licenses/OFL-JetBrainsMono.txt`).
+JetBrains Mono (numbers) and Space Grotesk (text) are bundled under the SIL Open Font License 1.1 (`licenses/OFL-JetBrainsMono.txt`, `licenses/OFL-SpaceGrotesk.txt`).

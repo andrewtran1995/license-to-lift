@@ -47,6 +47,7 @@ import androidx.compose.foundation.layout.size
 import io.github.andrewtran1995.liftlog.ui.figures.ExerciseFigure
 import io.github.andrewtran1995.liftlog.ui.theme.Caption
 import io.github.andrewtran1995.liftlog.ui.theme.Mono
+import io.github.andrewtran1995.liftlog.ui.theme.numbers
 import io.github.andrewtran1995.liftlog.ui.theme.Panel
 import io.github.andrewtran1995.liftlog.ui.theme.ReadoutRow
 import io.github.andrewtran1995.liftlog.ui.theme.ScreenHeader
@@ -113,7 +114,7 @@ fun IntelScreen(dao: WorkoutDao, contentPadding: PaddingValues) {
                     FilterChip(
                         selected = t.id == selected.id,
                         onClick = { selectedId = t.id },
-                        label = { Text(t.name, maxLines = 1) },
+                        label = { Text(t.name.lowercase(), maxLines = 1) },
                         leadingIcon = { ExerciseFigure(t.name, Modifier.size(width = 28.dp, height = 24.dp)) },
                         modifier = Modifier.height(io.github.andrewtran1995.liftlog.ui.log.ChipHeight),
                         colors = FilterChipDefaults.filterChipColors(
@@ -131,7 +132,7 @@ fun IntelScreen(dao: WorkoutDao, contentPadding: PaddingValues) {
             }
         }
         if (points.isEmpty()) {
-            item { Text("No sessions logged for ${selected.name} yet.", color = Spy.Muted) }
+            item { Text("No sessions logged for ${selected.name.lowercase()} yet.", color = Spy.Muted) }
             return@LazyColumn
         }
         item {
@@ -183,8 +184,8 @@ fun IntelScreen(dao: WorkoutDao, contentPadding: PaddingValues) {
 private fun Stat(label: String, value: String, sub: String, modifier: Modifier = Modifier, color: Color = Spy.Text) {
     Panel(modifier) {
         Caption(label)
-        Text(value, style = MaterialTheme.typography.headlineSmall, color = color, maxLines = 1)
-        Text(sub, style = MaterialTheme.typography.bodySmall, color = Spy.Muted, maxLines = 1)
+        Text(value, style = MaterialTheme.typography.headlineSmall.numbers(), color = color, maxLines = 1)
+        Text(sub, style = MaterialTheme.typography.bodySmall.numbers(), color = Spy.Muted, maxLines = 1)
     }
 }
 

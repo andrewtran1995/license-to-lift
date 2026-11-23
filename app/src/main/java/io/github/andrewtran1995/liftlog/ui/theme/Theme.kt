@@ -23,7 +23,7 @@ import io.github.andrewtran1995.liftlog.R
  * "Q-Lab" theme: a lab bench at night. Blueprint-grid backdrop lit by two soft lamps, glass
  * chrome that refracts it, translucent instrument panels, one signal cyan for anything live,
  * a classified red for destructive actions, and a monospaced face so numbers read like
- * instruments. Always dark. Motion follows Material 3 Expressive springs.
+ * instruments: Space Grotesk for words, JetBrains Mono for numbers. Always dark. Motion follows Material 3 Expressive springs.
  */
 object Spy {
     val Ink = Color(0xFF05080D)        // page, under the blueprint grid
@@ -40,6 +40,15 @@ object Spy {
     val Classified = Color(0xFFE5484D) // destructive
 }
 
+/** Words: headings, labels, body. */
+val Sans = FontFamily(
+    Font(R.font.space_grotesk_regular, FontWeight.Normal),
+    Font(R.font.space_grotesk_medium, FontWeight.Medium),
+    Font(R.font.space_grotesk_bold, FontWeight.Bold),
+    Font(R.font.space_grotesk_bold, FontWeight.ExtraBold),
+)
+
+/** Numbers: weights, reps, set counts, chart labels; monospaced so columns line up. */
 val Mono = FontFamily(
     Font(R.font.jetbrains_mono_regular, FontWeight.Normal),
     Font(R.font.jetbrains_mono_medium, FontWeight.Medium),
@@ -68,20 +77,24 @@ private val Scheme = darkColorScheme(
     onSecondaryContainer = Spy.Signal,
 )
 
-private fun mono(size: Int, weight: FontWeight = FontWeight.Normal, spacing: Double = 0.0, line: Int = (size * 1.4).toInt()) =
-    TextStyle(fontFamily = Mono, fontSize = size.sp, fontWeight = weight, letterSpacing = spacing.sp, lineHeight = line.sp)
+private fun sans(size: Int, weight: FontWeight = FontWeight.Normal, spacing: Double = 0.0, line: Int = (size * 1.4).toInt()) =
+    TextStyle(fontFamily = Sans, fontSize = size.sp, fontWeight = weight, letterSpacing = spacing.sp, lineHeight = line.sp)
+
+/** The same style in the number face: use for anything that is mostly digits. */
+fun TextStyle.numbers(): TextStyle = copy(fontFamily = Mono)
 
 private val Type = Typography(
-    headlineLarge = mono(30, FontWeight.ExtraBold, 0.5, 36),
-    headlineSmall = mono(22, FontWeight.Bold, 0.5, 28),
-    titleLarge = mono(18, FontWeight.Bold, 0.5),
-    titleMedium = mono(15, FontWeight.Bold, 0.5),
-    bodyLarge = mono(16),
-    bodyMedium = mono(14),
-    bodySmall = mono(12),
-    labelLarge = mono(14, FontWeight.Bold, 1.5),
-    labelMedium = mono(12, FontWeight.Medium, 1.5),
-    labelSmall = mono(11, FontWeight.Medium, 1.5),
+    // Text is lowercase except buttons, which stay uppercase: label styles keep wide tracking for them.
+    headlineLarge = sans(32, FontWeight.Bold, 0.0, 36),
+    headlineSmall = sans(23, FontWeight.Bold, 0.0, 28),
+    titleLarge = sans(19, FontWeight.Bold, 0.0),
+    titleMedium = sans(16, FontWeight.Bold, 0.0),
+    bodyLarge = sans(16),
+    bodyMedium = sans(14),
+    bodySmall = sans(12),
+    labelLarge = sans(14, FontWeight.Bold, 1.5),
+    labelMedium = sans(12, FontWeight.Medium, 1.2),
+    labelSmall = sans(11, FontWeight.Medium, 0.8),
 )
 
 /** Softer, lab-equipment corners to suit the glass. */
