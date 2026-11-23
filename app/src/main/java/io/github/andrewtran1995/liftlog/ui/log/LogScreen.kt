@@ -18,6 +18,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -306,8 +309,10 @@ private fun AddExerciseSheet(
     onAdd: (String) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = Spy.Panel) {
-        Box(Modifier.padding(horizontal = 20.dp).padding(bottom = 16.dp).navigationBarsPadding()) {
+    // Fully expanded, and padded for the keyboard, so the search box and its matches stay above it.
+    val state = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = state, containerColor = Spy.Panel) {
+        Box(Modifier.fillMaxHeight().padding(horizontal = 20.dp).padding(bottom = 16.dp).navigationBarsPadding().imePadding()) {
             AddExercisePanel(
                 catalog = catalog,
                 repeatable = emptyList(),
@@ -327,6 +332,11 @@ private fun recentMissions(history: List<WorkoutWithExercises>, activeId: String
         .take(3)
 }
 
+/**
+ * Add screen: search box first, then (with an empty box) Repeat a mission and recent exercises.
+ * While you type, only the matches show below the box, inline, so the keyboard and results
+ * never cover it. Enter picks an exact match or adds the text as a new exercise.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun AddExercisePanel(
@@ -337,7 +347,35 @@ private fun AddExercisePanel(
     onRepeat: (WorkoutWithExercises) -> Unit,
 ) {
     var query by remember { mutableStateOf("") }
+    val focus = LocalFocusManager.current
+    val result = remember(query, catalog) { searchCatalog(query, catalog) }
+    fun pick(t: ExerciseTypeEntity) { focus.clearFocus(); query = ""; onPick(t) }
+    fun add(name: String) { focus.clearFocus(); query = ""; onAdd(name) }
+
     LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        item(key = "search") {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Caption(if (catalog.isEmpty()) "Add your first exercise" else "Add exercise")
+                ExerciseSearchField(
+                    value = query,
+                    onValueChange = { query = it },
+                    onSubmit = {
+                        when {
+                            result.exact != null -> pick(result.exact)
+                            query.isNotBlank() -> add(query.trim())
+                        }
+                    },
+                    colors = fieldColors(),
+                )
+            }
+        }
+        if (query.isNotBlank()) {
+            if (result.exact == null) {
+                item(key = "add") { ExerciseResultRow("+ Add \u201c${query.trim()}\u201d to catalog", onClick = { add(query.trim()) }, highlight = true) }
+            }
+            items(result.matches, key = { "m-" + it.id }) { t -> ExerciseResultRow(t.name, onClick = { pick(t) }) }
+            return@LazyColumn
+        }
         if (repeatable.isNotEmpty()) {
             item { Caption("Repeat a mission") }
             repeatable.forEach { w ->
@@ -355,25 +393,14 @@ private fun AddExercisePanel(
                 }
             }
         }
-        item { Caption(if (catalog.isEmpty()) "Add your first exercise" else "Add exercise") }
-        item {
-            ExercisePicker(
-                value = query,
-                catalog = catalog,
-                colors = fieldColors(),
-                onValueChange = { query = it },
-                onPick = { onPick(it); query = "" },
-                onAdd = { onAdd(it); query = "" },
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
         if (catalog.isNotEmpty()) {
+            item { Caption("Recent") }
             item {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     catalog.take(12).forEach { t ->
                         FilterChip(
                             selected = false,
-                            onClick = { onPick(t) },
+                            onClick = { pick(t) },
                             label = { Text(t.name, maxLines = 1) },
                             leadingIcon = { ExerciseFigure(t.name, Modifier.size(width = 28.dp, height = 24.dp)) },
                             colors = chipColors(),
