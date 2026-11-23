@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PROTOTYPE · License to Lift text style</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500;700&family=Martian+Mono:wght@400;500;700;800&family=Chakra+Petch:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#202124;font-family:system-ui,sans-serif;color:#ddd;padding:20px 0 90px}
+.seg{display:flex;gap:6px;justify-content:center;margin-bottom:10px}.seg button{padding:6px 12px}.seg .on{font-weight:700}
+.ph{width:340px;margin:0 auto;border-radius:28px;border:1px solid #26303B;background:#05080D;background-image:linear-gradient(#ffffff0c 1px,transparent 1px),linear-gradient(90deg,#ffffff0c 1px,transparent 1px);background-size:20px 20px;color:#E4E8EC;padding:18px 14px 12px;min-height:620px}
+.cap{font-size:10.5px;color:#3FE0C5;font-weight:500;letter-spacing:.06em}.mut{color:#93A0AE}.h1{font-size:26px;font-weight:800;line-height:1.1;margin:2px 0 0}
+.row{display:flex;align-items:center;gap:8px}.B{letter-spacing:.12em;font-weight:700;text-transform:uppercase}
+.btn{background:#3FE0C5;color:#05080D;border:0;border-radius:20px;padding:9px 14px;font-size:12px;font-family:inherit}
+.tabs{display:flex;gap:6px;margin:12px 0;overflow:hidden}.plus{flex:none;width:34px;height:34px;border-radius:9px;border:1px solid #3FE0C573;background:#3FE0C524;color:#3FE0C5;font-weight:800;display:grid;place-items:center}
+.chip{flex:none;height:34px;padding:0 10px;border-radius:9px;border:1px solid #26303B;background:#0D131BE0;font-size:11.5px;display:flex;align-items:center;white-space:nowrap}.chip.on{background:#3FE0C52E;color:#3FE0C5;border-color:#3FE0C566}
+.panel{background:#0D131BE0;border:1px solid #ffffff1f;border-radius:18px;padding:12px;margin-top:10px}
+.set{display:flex;align-items:center;height:30px;font-size:14px;font-weight:700}.set .n{width:32px;color:#93A0AE;font-size:12px}
+.box{flex:1;height:52px;border:1px solid #ffffff1f;background:#141C26F2;border-radius:10px;display:grid;place-items:center;font-size:24px;font-weight:800}
+.step{width:44px;height:52px;border:1px solid #ffffff1f;border-radius:12px;display:grid;place-items:center;font-size:20px}
+.qr{display:flex;gap:5px;margin:10px 0}.qr span{flex:1;text-align:center;border:1px solid #26303B;border-radius:8px;padding:6px 0;font-size:12px}.qr span.on{background:#3FE0C52E;color:#3FE0C5;border-color:#3FE0C566}
+.hold{height:48px;border-radius:24px;background:#3FE0C547;display:grid;place-items:center;font-size:12.5px;position:relative;overflow:hidden}.hold i{position:absolute;inset:0 62% 0 0;background:#3FE0C5}.hold b{position:relative}
+.nav{display:flex;margin-top:14px;border:1px solid #ffffff1a;border-radius:24px;background:#141C26CC;padding:5px}.nav div{flex:1;text-align:center;padding:9px 0;font-size:10.5px;color:#93A0AE;border-radius:19px;letter-spacing:.06em}.nav div.on{color:#3FE0C5;background:#3FE0C524;outline:1px solid #3FE0C573}
+.rd{margin-top:8px}.rd .l{font-size:13.5px}.rd .v{font-size:12px;color:#3FE0C5;margin-top:1px}.acts{display:flex;justify-content:flex-end;gap:16px;margin-top:10px;font-size:11.5px}
+.bar{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:999px;background:#fff;color:#111;box-shadow:0 4px 16px #0006}
+.bar button{background:none;border:0;font-size:18px;width:36px;height:32px;cursor:pointer}.bar span{font-size:13px;min-width:220px;text-align:center}
+.note{font-size:13px;color:#aaa;text-align:center;margin-top:10px}
+</style></head><body>
+<div class="seg"><button id="sm" class="on">Mission</button><button id="sd">Dossier</button></div>
+<div class="ph" id="ph"></div><div class="note" id="nt"></div>
+<div class="bar"><button id="pv" aria-label="Previous">←</button><span id="lb"></span><button id="nx" aria-label="Next">→</button></div>
+<script>
+const ex=[['delt machine',3],['seated dip',6],['butterfly machine',4],['pulldown',5],['shoulder press',4],['chest press',4]];
+const sets=[[33,7],[22,8],[22,6]];
+const dossier=[['chest press','4×8 @ 66 lb'],['shoulder press','1×6 @ 33 lb, 1×7 @ 22 lb, 2×8 @ 22 lb'],['pulldown','1×8 @ 33 lb, 1×8 @ 44 lb, 1×8 @ 55 lb, 2×8 @ 66 lb'],['butterfly machine','1×8 @ 44 lb, 1×8 @ 55 lb, 2×8 @ 66 lb'],['seated dip','3×8 @ 66 lb, 3×8 @ 88 lb'],['delt machine','1×7 @ 33 lb, 1×8 @ 22 lb, 1×6 @ 22 lb']];
+const V=[{k:'A',name:'JetBrains Mono',body:"'JetBrains Mono'",num:"'JetBrains Mono'"},{k:'B',name:'IBM Plex Mono',body:"'IBM Plex Mono'",num:"'IBM Plex Mono'"},{k:'C',name:'Martian Mono',body:"'Martian Mono'",num:"'Martian Mono'"},{k:'D',name:'Chakra Petch',body:"'Chakra Petch'",num:"'Chakra Petch'"},{k:'E',name:'Space Grotesk + JetBrains numbers (chosen)',body:"'Space Grotesk'",num:"'JetBrains Mono'"}];
+const q=new URLSearchParams(location.search);let vi=Math.max(0,V.findIndex(v=>v.k===(q.get('variant')||'E'))),screen='mission';
+const ph=document.getElementById('ph');const N=(v,t)=>`<span style="font-family:${v.num},monospace">${t}</span>`;
+const nav=i=>`<div class="nav">${['mission','dossier','intel'].map((n,j)=>`<div class="${j===i?'on':''}">${n}</div>`).join('')}</div>`;
+function mission(v){return `<div class="row"><div style="flex:1"><div class="cap">// mission active · 2026-11-21 · sat</div><div class="h1">mission log</div><div class="mut" style="font-size:12px;margin-top:2px">op: arm day</div></div><button class="btn B">Finish</button></div>
+<div class="tabs"><div class="plus">+</div>${ex.map(([n,c],i)=>`<div class="chip${i===0?' on':''}">${n} · ${N(v,c)}</div>`).join('')}</div>
+<div class="row"><div style="flex:1"><div style="font-size:19px;font-weight:700">delt machine</div><div class="mut" style="font-size:10.5px">first time on file</div></div><span class="mut B" style="font-size:11px">Remove</span></div>
+<div style="margin:8px 0 6px">${sets.map(([w,r],i)=>`<div class="set"><span class="n">${N(v,'0'+(i+1))}</span><span style="flex:1">${N(v,w+' lb  ×  '+r)}</span><span class="mut">✕</span></div>`).join('')}</div>
+<div class="panel"><div class="row" style="align-items:flex-end;gap:10px"><div style="flex:1"><div class="mut" style="font-size:10.5px">weight · lb</div><div class="box">${N(v,'22')}</div></div><div style="flex:1.25"><div class="mut" style="font-size:10.5px">reps</div><div class="row" style="gap:5px"><div class="step">−</div><div class="box" style="border:0;background:none">${N(v,'6')}</div><div class="step">+</div></div></div></div>
+<div class="qr">${[2,4,6,8,10].map(n=>`<span class="${n===6?'on':''}">${N(v,n)}</span>`).join('')}</div><div class="hold"><i></i><b class="B">✓  Hold to log set ${N(v,'04')}</b></div></div>${nav(0)}`}
+function dos(v){return `<div class="row" style="align-items:flex-end"><div style="flex:1"><div class="cap">// 2 on file</div><div class="h1">dossier</div></div><span class="B" style="color:#3FE0C5;font-size:12px">Data</span></div>
+<div class="panel"><div class="cap">file 002  ·  2026-11-21 · sat</div><div style="font-size:17px;font-weight:700;margin-top:2px">op: arm day</div><div style="height:1px;background:#26303B;margin:8px 0 2px"></div>
+${dossier.map(([n,x])=>`<div class="rd"><div class="l">${n}</div><div class="v">${N(v,x)}</div></div>`).join('')}<div class="acts"><span class="B" style="color:#3FE0C5">Edit</span><span class="B" style="color:#E5484D">Burn</span></div></div>${nav(1)}`}
+function render(){const v=V[vi];ph.style.fontFamily=`${v.body},monospace`;ph.innerHTML=screen==='mission'?mission(v):dos(v);document.getElementById('lb').textContent=`${v.k} (${v.name})`;
+document.getElementById('nt').textContent='PROTOTYPE · throwaway';history.replaceState(null,'','?variant='+v.k);document.getElementById('sm').classList.toggle('on',screen==='mission');document.getElementById('sd').classList.toggle('on',screen==='dossier')}
+const go=d=>{vi=(vi+d+V.length)%V.length;render()};pv.onclick=()=>go(-1);nx.onclick=()=>go(1);sm.onclick=()=>{screen='mission';render()};sd.onclick=()=>{screen='dossier';render()};
+addEventListener('keydown',e=>{const t=e.target;if(t&&(t.isContentEditable||/INPUT|TEXTAREA|SELECT/.test(t.tagName)))return;if(e.key==='ArrowLeft')go(-1);if(e.key==='ArrowRight')go(1)});render();
+</script></body></html>
