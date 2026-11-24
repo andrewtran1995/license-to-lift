@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.github.andrewtran1995.liftlog.data.cleanName
 import io.github.andrewtran1995.liftlog.data.ExerciseEntity
 import io.github.andrewtran1995.liftlog.data.ExerciseTypeEntity
 import io.github.andrewtran1995.liftlog.data.ExerciseWithSets
