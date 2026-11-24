@@ -34,7 +34,8 @@ The user may send a full-database export (`license-to-lift-db-*.json`, format in
   back with the same structure. Keep every existing id. New rows get new UUIDs. Bump
   `updatedAt` on any workout you change.
 - **Keep references whole.** Every exercise needs its workout, and every set its exercise, in the
-  same file. Catalog names must stay unique (trimmed, case-insensitive).
+  same file. Exercise and operation names are stored trimmed and lower-case (the app lower-cases
+  them on import anyway). Catalog names must stay unique (trimmed, case-insensitive).
 - **To delete a workout, set `"deleted": true`** rather than dropping its rows, so MERGE removes
   it on the phone too.
 - **Check before handing it back:** `python3 tools/check_dump.py FILE` must print "OK to import".

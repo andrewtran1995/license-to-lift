@@ -8,10 +8,10 @@ lossless copy of the app's Room database: every row of every table, ids included
 {
   "app": "license-to-lift",
   "format": "database",
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "exportedAt": 1795290000000,
   "tables": {
-    "exercise_types": [{ "id": "…", "name": "Leg curls", "nameKey": "leg curls", "createdAt": 1795… }],
+    "exercise_types": [{ "id": "…", "name": "leg curls", "nameKey": "leg curls", "createdAt": 1795… }],
     "workouts":       [{ "id": "…", "date": "2026-11-16", "name": "Leg day", "notes": "", "unit": "lb",
                          "updatedAt": 1795…, "deleted": false, "dirty": true }],
     "exercises":      [{ "id": "…", "workoutId": "…", "position": 0, "name": "Leg curls", "typeId": "…" }],
@@ -26,7 +26,7 @@ lossless copy of the app's Room database: every row of every table, ids included
 | Table | Field | Notes |
 |---|---|---|
 | `exercise_types` | `id` | Any unique string. UUIDs in practice. |
-| | `name` | Display name. `nameKey` is recomputed from it on import (trimmed, lower-cased), and must be unique. |
+| | `name` | Display name, stored trimmed and lower-case (imports lower-case it). `nameKey` is recomputed from it on import, and must be unique. |
 | `workouts` | `date` | `YYYY-MM-DD`, local calendar. |
 | | `unit` | `lb` or `kg`: the unit this workout's weights are in. |
 | | `updatedAt` | Epoch milliseconds. Bump it when you edit a workout. |

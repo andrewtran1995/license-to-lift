@@ -20,7 +20,7 @@ data class DatabaseDump(
         const val APP = "license-to-lift"
         const val FORMAT = "database"
         /** Keep equal to the Room database version in LiftLogDatabase. */
-        const val SCHEMA_VERSION = 3
+        const val SCHEMA_VERSION = 4
 
         /** True if [text] looks like a full-database dump rather than a web-app backup. */
         fun looksLikeDump(text: String): Boolean =

@@ -58,7 +58,7 @@ fun ExerciseSearchField(
         textStyle = MaterialTheme.typography.titleMedium,
         singleLine = true,
         colors = colors,
-        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Done),
+        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.None, imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(onDone = { onSubmit() }),
     )
 }

@@ -50,7 +50,7 @@ abstract class WorkoutDao {
     open suspend fun ensureType(name: String): ExerciseTypeEntity {
         val key = exerciseKey(name)
         typeByKey(key)?.let { return it }
-        val type = ExerciseTypeEntity(UUID.randomUUID().toString(), name.trim(), key, System.currentTimeMillis())
+        val type = ExerciseTypeEntity(UUID.randomUUID().toString(), key, key, System.currentTimeMillis())
         insertType(type)
         return typeByKey(key) ?: type
     }
@@ -104,7 +104,12 @@ abstract class WorkoutDao {
      * exists under another id is folded into the existing one.
      */
     @Transaction
-    open suspend fun importDump(d: DatabaseDump, replace: Boolean): ImportResult {
+    open suspend fun importDump(file: DatabaseDump, replace: Boolean): ImportResult {
+        val d = file.copy(
+            types = file.types.map { it.copy(name = cleanName(it.name), nameKey = cleanName(it.name)) },
+            workouts = file.workouts.map { it.copy(name = cleanName(it.name)) },
+            exercises = file.exercises.map { it.copy(name = cleanName(it.name)) },
+)
         if (replace) { wipeSets(); wipeExercises(); wipeWorkouts(); wipeTypes() }
 
         val remap = mutableMapOf<String, String>()

@@ -59,7 +59,10 @@ data class ExerciseTypeEntity(
     val createdAt: Long,
 )
 
-fun exerciseKey(name: String): String = name.trim().lowercase()
+/** Exercise and operation names are stored trimmed and lower-case. */
+fun cleanName(name: String): String = name.trim().lowercase()
+
+fun exerciseKey(name: String): String = cleanName(name)
 
 /** A set. Weight and reps are both optional: a set can be just a weight, and bodyweight work has no weight. */
 @Entity(

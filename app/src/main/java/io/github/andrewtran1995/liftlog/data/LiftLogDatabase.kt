@@ -9,7 +9,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [WorkoutEntity::class, ExerciseEntity::class, SetEntity::class, ExerciseTypeEntity::class],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 abstract class LiftLogDatabase : RoomDatabase() {
@@ -18,7 +18,7 @@ abstract class LiftLogDatabase : RoomDatabase() {
     companion object {
         fun create(context: Context): LiftLogDatabase =
             Room.databaseBuilder(context, LiftLogDatabase::class.java, "liftlog.db")
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                 .build()
     }
 }
@@ -52,5 +52,21 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
 val MIGRATION_2_3 = object : Migration(2, 3) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL("ALTER TABLE `sets` ADD COLUMN `loggedAt` INTEGER")
+    }
+}
+
+/**
+ * v4 stores exercise and operation names lower-case. Catalog keys were already lower-cased and
+ * unique, so no two entries can collide; sets and links are untouched. Renamed workouts are
+ * marked changed so a future sync pushes them.
+ */
+val MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("UPDATE exercise_types SET name = nameKey")
+        db.execSQL("UPDATE exercises SET name = lower(trim(name)) WHERE name != lower(trim(name))")
+        db.execSQL(
+            "UPDATE workouts SET name = lower(trim(name)), dirty = 1, " +
+                "updatedAt = CAST(strftime('%s','now') AS INTEGER) * 1000 WHERE name != lower(trim(name))"
+        )
     }
 }

@@ -11,7 +11,7 @@ import re
 import sys
 from collections import Counter
 
-SCHEMA_VERSION = 3  # keep equal to DatabaseDump.SCHEMA_VERSION
+SCHEMA_VERSION = 4  # keep equal to DatabaseDump.SCHEMA_VERSION
 
 
 def check(doc, schema=SCHEMA_VERSION):

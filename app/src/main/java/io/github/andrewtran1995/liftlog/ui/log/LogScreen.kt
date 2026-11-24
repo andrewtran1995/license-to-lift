@@ -43,6 +43,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
@@ -592,7 +593,8 @@ private fun DetailsSheet(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Caption("// Mission details")
-            OutlinedTextField(n, { n = it }, Modifier.fillMaxWidth(), label = { Text("operation") }, placeholder = { Text("leg day") }, singleLine = true, colors = fieldColors())
+            OutlinedTextField(n, { n = it }, Modifier.fillMaxWidth(), label = { Text("operation") }, placeholder = { Text("leg day") }, singleLine = true, colors = fieldColors(),
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.None))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) { Caption("Date"); Text(formatStamp(d.toString()), style = MaterialTheme.typography.titleMedium) }
                 TextButton(onClick = { pickingDate = true }) { Text("CHANGE", style = MaterialTheme.typography.labelLarge) }

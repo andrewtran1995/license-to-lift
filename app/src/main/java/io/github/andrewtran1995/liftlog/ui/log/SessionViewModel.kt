@@ -177,7 +177,7 @@ class SessionViewModel(private val dao: WorkoutDao, private val store: SessionSt
     fun updateDetails(name: String, notes: String, date: LocalDate) = viewModelScope.launch {
         val current = session.value?.workout ?: return@launch
         writes.withLock {
-            dao.upsertWorkout(current.copy(name = name.trim(), notes = notes.trim(), date = date.toString(), updatedAt = System.currentTimeMillis()))
+            dao.upsertWorkout(current.copy(name = cleanName(name), notes = notes.trim(), date = date.toString(), updatedAt = System.currentTimeMillis()))
         }
     }
 

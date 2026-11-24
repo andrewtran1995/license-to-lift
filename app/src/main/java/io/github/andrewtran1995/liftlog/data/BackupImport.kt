@@ -66,12 +66,12 @@ object BackupImport {
             val exercises = w.exercises.mapIndexed { i, (name, sets) ->
                 val type = dao.ensureType(name)
                 val exId = "${w.id}-e$i"
-                ExerciseEntity(exId, w.id, i, name, type.id) to sets.mapIndexed { j, (weight, reps) ->
+                ExerciseEntity(exId, w.id, i, type.name, type.id) to sets.mapIndexed { j, (weight, reps) ->
                     SetEntity("$exId-s$j", exId, j, weight, reps)
                 }
             }
             dao.saveWorkout(
-                WorkoutEntity(w.id, w.date, w.name, w.notes, w.unit, w.updatedAt),
+                WorkoutEntity(w.id, w.date, cleanName(w.name), w.notes, w.unit, w.updatedAt),
                 exercises,
             )
         }
